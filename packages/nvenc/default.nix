@@ -68,12 +68,12 @@ pkgs.stdenv.mkDerivation rec {
     runHook postInstall
   '';
 
-  meta = {
+  meta = with pkgs.lib; {
     homepage = "https://github.com/rigaya/NVEnc";
     mainProgram = "nvencc";
     changelog = "https://github.com/rigaya/NVEnc/releases/tag/${src.tag}";
     description = "NVENC high-speed encoding performance experiment tool";
-    license = pkgs.lib.licenses.mit;
+    license = licenses.mit;
     platforms = [ "x86_64-linux" ];
   };
 }

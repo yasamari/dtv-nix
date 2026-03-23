@@ -119,12 +119,12 @@ pkgs.stdenv.mkDerivation rec {
     runHook postInstall
   '';
 
-  meta = {
+  meta = with pkgs.lib; {
     homepage = "https://github.com/rigaya/QSVEnc";
     mainProgram = "qsvencc";
     changelog = "https://github.com/rigaya/QSVEnc/releases/tag/${src.tag}";
     description = "QSV high-speed encoding performance experiment tool";
-    license = pkgs.lib.licenses.mit;
+    license = licenses.mit;
     platforms = [ "x86_64-linux" ];
   };
 }
