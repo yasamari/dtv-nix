@@ -102,6 +102,9 @@ stdenv.mkDerivation rec {
   postPatch = ''
     substituteInPlace QSVPipeline/rgy_opencl.cpp \
       --replace 'img_desc.mem_object' 'img_desc.buffer'
+
+    substituteInPlace QSVPipeline/qsv_hw_va_utils_drm.cpp \
+      --replace-fail '!strcmp(driverName, MFX_DRM_INTEL_DRIVER_NAME)' '(!strcmp(driverName, MFX_DRM_INTEL_DRIVER_NAME) || !strcmp(driverName, "xe"))'
   '';
 
   configurePhase = ''
