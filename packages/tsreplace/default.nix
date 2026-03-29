@@ -3,8 +3,6 @@ pkgs.stdenv.mkDerivation rec {
   pname = "tsreplace";
   version = "0.19";
 
-  hardeningDisable = [ "format" ];
-
   src = pkgs.fetchFromGitHub {
     owner = "rigaya";
     repo = "tsreplace";
@@ -13,45 +11,29 @@ pkgs.stdenv.mkDerivation rec {
   };
 
   nativeBuildInputs = with pkgs; [
+    meson
+    ninja
     pkg-config
-    git
   ];
 
   buildInputs = with pkgs; [
     ffmpeg
   ];
 
-  configurePhase = ''
-    runHook preConfigure
+  postPatch = ''
+    substituteInPlace meson.build \
+      --replace-fail "version: run_command('git', 'describe', '--tags', '--abbrev=0', check: true).stdout().strip()," "version: '${version}',"
 
-    patchShebangs ./configure
-    ./configure --prefix=$out --cxx=$CXX
-
-    runHook postConfigure
-  '';
-
-  buildPhase = ''
-    runHook preBuild
-
-    make
-
-    runHook postBuild
-  '';
-
-  installPhase = ''
-    runHook preInstall
-
-    make install
-
-    runHook postInstall
+    substituteInPlace app/rgy_log.cpp \
+      --replace-fail "ret = _ftprintf(stderr, mes);" "ret = _ftprintf(stderr, _T(\"%s\"), mes);"
   '';
 
   meta = with pkgs.lib; {
     homepage = "https://github.com/rigaya/tsreplace";
     mainProgram = "tsreplace";
-    changelog = "https://github.com/rigaya/tsreplace/releases/tag/${src.tag}";
-    description = "Replace TS video stream with re-encoded video while preserving other packets";
+    changelog = "https://github.com/rigaya/tsreplace/releases/tag/${version}";
+    description = "Tool to replace only video packets in MPEG-TS streams";
     license = licenses.mit;
-    platforms = [ "x86_64-linux" ];
+    platforms = platforms.linux;
   };
 }
