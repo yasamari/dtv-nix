@@ -1,7 +1,4 @@
-{ pkgs, ... }:
-let
-  avisynthplusCuda = pkgs.callPackage ../avisynthplus-cuda { };
-in
+{ perSystem, pkgs, ... }:
 pkgs.stdenv.mkDerivation rec {
   pname = "avisynthcudafilters";
   version = "0.7.3";
@@ -21,7 +18,7 @@ pkgs.stdenv.mkDerivation rec {
   ];
 
   buildInputs = with pkgs; [
-    avisynthplusCuda
+    perSystem.self.avisynthplus-cuda
     cudaPackages.cudatoolkit
     cudaPackages.cuda_nvcc
   ];
