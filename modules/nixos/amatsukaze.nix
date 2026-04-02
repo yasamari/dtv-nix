@@ -61,7 +61,7 @@ in
 
     port = lib.mkOption {
       type = lib.types.ints.between 1 65534;
-      default = 32770;
+      default = 32768;
       description = "AmatsukazeServerのポート番号。WebUIはこのポート+1で動作します。";
     };
 
