@@ -55,6 +55,7 @@ let
     joinLogoScp
     fdkaac
     pkgs.opusTools
+    pkgs.whisper-cpp
   ];
 
   runtimePath = lib.makeBinPath ([ dotnetRuntime ] ++ runtimeTools);
