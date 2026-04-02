@@ -3,6 +3,8 @@ pkgs.stdenv.mkDerivation {
   pname = "chapter_exe";
   version = "unstable-2025-10-18";
 
+  nativeBuildInputs = [ pkgs.makeWrapper ];
+
   src = pkgs.fetchFromGitHub {
     owner = "tobitti0";
     repo = "chapter_exe";
@@ -27,6 +29,8 @@ pkgs.stdenv.mkDerivation {
     runHook preInstall
 
     install -D -m 0755 src/chapter_exe "$out/bin/chapter_exe"
+    wrapProgram "$out/bin/chapter_exe" \
+      --prefix LD_LIBRARY_PATH : "${pkgs.lib.makeLibraryPath [ pkgs.avisynthplus ]}"
 
     runHook postInstall
   '';
