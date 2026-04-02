@@ -70,30 +70,16 @@ in
       default = false;
       description = "AmatsukazeServerとWebUIのポートを開放します。";
     };
-
-    extraReadWritePaths = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
-      default = [ ];
-      description = "systemdユニットに追加で書き込み許可するパス。録画ファイルの保存先などを指定してください。";
-      example = [
-        "/mnt/recordings"
-        "/srv/amatsukaze"
-      ];
-    };
   };
 
   config = lib.mkIf cfg.enable {
-    users.groups = lib.mkIf (cfg.group == defaultGroup) {
-      ${defaultGroup} = { };
-    };
+    users.groups.${cfg.group} = { };
 
-    users.users = lib.mkIf (cfg.user == defaultUser) {
-      ${defaultUser} = {
-        isSystemUser = true;
-        group = cfg.group;
-        home = stateDir;
-        createHome = false;
-      };
+    users.users.${cfg.user} = {
+      isSystemUser = true;
+      group = cfg.group;
+      home = stateDir;
+      createHome = false;
     };
 
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall [
@@ -113,7 +99,7 @@ in
         SupplementaryGroups = cfg.extraGroups;
         StateDirectory = "amatsukaze";
         WorkingDirectory = stateDir;
-        ReadWritePaths = [ stateDir ] ++ cfg.extraReadWritePaths;
+        ReadWritePaths = [ stateDir ];
         ExecStartPre = [ "${initializeState}" ];
         ExecStart = "${lib.getExe cfg.package} --port ${toString cfg.port}";
         Restart = "on-failure";
