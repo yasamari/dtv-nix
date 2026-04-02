@@ -1,8 +1,8 @@
-{ pkgs, ... }:
+{ perSystem, pkgs, ... }:
 let
   lib = pkgs.lib;
 
-  ffmpeg = if pkgs ? ffmpeg_6 then pkgs.ffmpeg_6 else pkgs.ffmpeg;
+  ffmpeg = pkgs.ffmpeg_6;
   dotnetSdk = pkgs.dotnetCorePackages.sdk_10_0;
   dotnetRuntime = pkgs.dotnetCorePackages.aspnetcore_10_0;
 
@@ -11,23 +11,23 @@ let
     sourceFile = ./deps.json;
   };
 
-  avisynthplusCuda = pkgs.callPackage ../avisynthplus-cuda { };
-  avisynthcudafilters = pkgs.callPackage ../avisynthcudafilters { };
-  nnedi3 = pkgs.callPackage ../nnedi3 { };
-  masktools = pkgs.callPackage ../masktools { };
-  mvtools = pkgs.callPackage ../mvtools { };
-  rgtools = pkgs.callPackage ../rgtools { };
-  yadifmod2 = pkgs.callPackage ../yadifmod2 { };
-  tivtc = pkgs.callPackage ../tivtc { };
+  avisynthplusCuda = perSystem.self.avisynthplus-cuda;
+  avisynthcudafilters = perSystem.self.avisynthcudafilters;
+  nnedi3 = perSystem.self.nnedi3;
+  masktools = perSystem.self.masktools;
+  mvtools = perSystem.self.mvtools;
+  rgtools = perSystem.self.rgtools;
+  yadifmod2 = perSystem.self.yadifmod2;
+  tivtc = perSystem.self.tivtc;
 
-  qsvenc = pkgs.callPackage ../qsvenc { };
-  nvenc = pkgs.callPackage ../nvenc { };
-  tsreplace = pkgs.callPackage ../tsreplace { };
-  tsreadex = pkgs.callPackage ../tsreadex { };
-  psisiarc = pkgs.callPackage ../psisiarc { };
-  b24tovtt = pkgs.callPackage ../b24tovtt { };
-  chapterExe = pkgs.callPackage ../chapter_exe { };
-  joinLogoScp = pkgs.callPackage ../join_logo_scp { };
+  qsvenc = perSystem.self.qsvenc;
+  nvenc = perSystem.self.nvenc;
+  tsreplace = perSystem.self.tsreplace;
+  tsreadex = perSystem.self.tsreadex;
+  psisiarc = perSystem.self.psisiarc;
+  b24tovtt = perSystem.self.b24tovtt;
+  chapterExe = perSystem.self.chapter_exe;
+  joinLogoScp = perSystem.self.join_logo_scp;
 
   fdkaac =
     if pkgs ? "fdk-aac-encoder" then
@@ -144,6 +144,16 @@ pkgs.stdenv.mkDerivation rec {
         -p:Deterministic=true
     done
 
+    dotnet publish AmatsukazeServer/AmatsukazeServer.csproj \
+      --configuration Release \
+      --runtime linux-x64 \
+      --no-restore \
+      -p:Platform=x64 \
+      -p:PublishSingleFile=false \
+      -p:ContinuousIntegrationBuild=true \
+      -p:Deterministic=true \
+      -o x64/Release/AmatsukazeServerPublish
+
     runHook postBuild
   '';
 
@@ -158,7 +168,29 @@ pkgs.stdenv.mkDerivation rec {
     install -Dm755 build/AmatsukazeCLI/AmatsukazeCLI "$exeDir/AmatsukazeCLI"
     install -Dm755 build/Amatsukaze/libAmatsukaze.so "$exeDir/libAmatsukaze.so"
 
-    cp -a x64/Release/. "$exeDir/"
+    dotnetOutputDir=""
+    for dir in x64/Release x64/Release/net* x64/Release/net*/linux-x64; do
+      if [ -f "$dir/AmatsukazeServerCLI.dll" ] && [ -f "$dir/AmatsukazeAddTask.dll" ] && [ -f "$dir/ScriptCommand.dll" ]; then
+        dotnetOutputDir="$dir"
+        break
+      fi
+    done
+
+    if [ -z "$dotnetOutputDir" ]; then
+      echo "Failed to locate .NET output directory under x64/Release" >&2
+      exit 1
+    fi
+
+    cp -a "$dotnetOutputDir"/. "$exeDir/"
+
+    webRootDir="x64/Release/AmatsukazeServerPublish/wwwroot"
+    if [ ! -d "$webRootDir" ]; then
+      echo "Failed to locate published WebUI directory: $webRootDir" >&2
+      exit 1
+    fi
+
+    mkdir -p "$exeDir/wwwroot"
+    cp -a "$webRootDir"/. "$exeDir/wwwroot/"
 
     cp -a defaults/. "$shareDir/"
     mkdir -p "$shareDir/scripts"

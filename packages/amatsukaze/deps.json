@@ -35,6 +35,11 @@
     "hash": "sha256-YeHralkfEzLmlrBj0jER+ta9hsbXv5skP81178V1ppw="
   },
   {
+    "pname": "Microsoft.AspNetCore.Components.WebAssembly.DevServer",
+    "version": "10.0.0",
+    "hash": "sha256-akCQI6iHuKIyDmZh5du+hifzPzQoGeMX3Y7ST/TFxRU="
+  },
+  {
     "pname": "Microsoft.AspNetCore.Components.WebAssembly.Server",
     "version": "10.0.0",
     "hash": "sha256-HnQiOK00wCWfMix21+bMRxn4ytY/RIZIFz3ZSp29D5g="
@@ -143,6 +148,16 @@
     "pname": "Microsoft.JSInterop.WebAssembly",
     "version": "10.0.0",
     "hash": "sha256-dJdTHFh4lZOmXI+88mLdJOf6UsKq/80N59+COq/KPpg="
+  },
+  {
+    "pname": "Microsoft.NET.Sdk.WebAssembly.Pack",
+    "version": "10.0.5",
+    "hash": "sha256-gwneB/pH5T80p0YW+XbMkep4BmZ+ycKEISol+fR2rGw="
+  },
+  {
+    "pname": "Microsoft.NETCore.App.Runtime.Mono.browser-wasm",
+    "version": "10.0.5",
+    "hash": "sha256-bkErTmR5f6Kxd0g8gkQnPBVTNPfuuKUKEwB53E5Ec18="
   },
   {
     "pname": "SixLabors.ImageSharp",
