@@ -70,6 +70,12 @@ in
       description = "KonomiTV プロセスに追加で付与する補助グループ。録画ファイルの保存先などのアクセス権限を調整するために使用できます。";
     };
 
+    openFirewall = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "KonomiTV が使用するポートを開放する。";
+    };
+
     mutableSettings = lib.mkOption {
       type = lib.types.bool;
       default = true;
@@ -134,5 +140,9 @@ in
         KONOMITV_LOGS_DIR = "${stateDir}/logs";
       };
     };
+
+    networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall [
+      (if (lib.hasAttrByPath [ "server" "port" ] cfg.settings) then cfg.settings.server.port else 7000)
+    ];
   };
 }
