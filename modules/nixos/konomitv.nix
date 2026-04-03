@@ -127,7 +127,12 @@ in
         RestartSec = 5;
       };
 
-      environment.XDG_STATE_HOME = "/var/lib";
+      environment = {
+        XDG_STATE_HOME = "/var/lib";
+        KONOMITV_CONFIG_YAML_PATH = "${stateDir}/config.yaml";
+        KONOMITV_DATA_DIR = "${stateDir}/data";
+        KONOMITV_LOGS_DIR = "${stateDir}/logs";
+      };
     };
   };
 }

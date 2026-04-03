@@ -299,6 +299,11 @@ pkgs.stdenv.mkDerivation rec {
     hash = "sha256-VxJD9ZTRAiS6YKtH/XR7Ko0EwYarkxhTGl/fPp9JxeE=";
   };
 
+  patches = [
+    ./konomitv-immutable-paths.patch
+    ./konomitv-immutable-logs-path.patch
+  ];
+
   nativeBuildInputs = [ pkgs.makeWrapper ];
 
   dontBuild = true;
@@ -385,25 +390,36 @@ pkgs.stdenv.mkDerivation rec {
       state_root="\$HOME/.local/state/konomitv"
     fi
 
-    runtime_dir="\$state_root/runtime"
-
-    mkdir -p "\$runtime_dir" "\$state_root/data" "\$state_root/logs"
-
-    if [ ! -f "\$state_root/config.yaml" ]; then
-      cp "\$template_dir/config.yaml" "\$state_root/config.yaml"
+    if [ -z "\$KONOMITV_CONFIG_YAML_PATH" ]; then
+      KONOMITV_CONFIG_YAML_PATH="\$state_root/config.yaml"
     fi
 
-    rm -rf "\$runtime_dir/server" "\$runtime_dir/client"
-    cp -a "\$template_dir/server" "\$runtime_dir/server"
-    cp -a "\$template_dir/client" "\$runtime_dir/client"
-    cp "\$template_dir/config.example.yaml" "\$runtime_dir/config.example.yaml"
+    if [ -z "\$KONOMITV_DATA_DIR" ]; then
+      KONOMITV_DATA_DIR="\$state_root/data"
+    fi
 
-    ln -sfn "\$state_root/config.yaml" "\$runtime_dir/config.yaml"
-    rm -rf "\$runtime_dir/server/data" "\$runtime_dir/server/logs"
-    ln -sfn "\$state_root/data" "\$runtime_dir/server/data"
-    ln -sfn "\$state_root/logs" "\$runtime_dir/server/logs"
+    if [ -z "\$KONOMITV_LOGS_DIR" ]; then
+      KONOMITV_LOGS_DIR="\$state_root/logs"
+    fi
 
-    cd "\$runtime_dir/server"
+    config_dir="\$(${pkgs.coreutils}/bin/dirname "\$KONOMITV_CONFIG_YAML_PATH")"
+
+    mkdir -p \
+      "\$config_dir" \
+      "\$KONOMITV_DATA_DIR" \
+      "\$KONOMITV_DATA_DIR/account-icons" \
+      "\$KONOMITV_DATA_DIR/thumbnails" \
+      "\$KONOMITV_LOGS_DIR"
+
+    if [ ! -e "\$KONOMITV_CONFIG_YAML_PATH" ]; then
+      cp "\$template_dir/config.yaml" "\$KONOMITV_CONFIG_YAML_PATH"
+    fi
+
+    export KONOMITV_CONFIG_YAML_PATH
+    export KONOMITV_DATA_DIR
+    export KONOMITV_LOGS_DIR
+
+    cd "\$template_dir/server"
     exec "${pythonEnv}/bin/python" KonomiTV.py "\$@"
     EOF
     chmod +x "$out/bin/konomitv"
