@@ -308,6 +308,13 @@ pkgs.stdenv.mkDerivation rec {
 
   dontBuild = true;
 
+  postPatch = ''
+    substituteInPlace server/app/metadata/ThumbnailGenerator.py \
+      --replace-fail \
+      "pathlib.Path(cv2.__file__).parent / 'data' / 'haarcascade_frontalface_default.xml'" \
+      "pathlib.Path('${pkgs.opencv}/share/opencv4/haarcascades/haarcascade_frontalface_default.xml')"
+  '';
+
   installPhase = ''
     runHook preInstall
 
