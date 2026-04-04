@@ -151,6 +151,8 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    environment.systemPackages = [ cfg.package ];
+
     users.groups.${cfg.group} = { };
 
     users.users.${cfg.user} = {
