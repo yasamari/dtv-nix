@@ -71,6 +71,33 @@ let
     EOF
         fi
 
+        if [ ! -e "${stateDir}/Common.ini" ]; then
+          ${pkgs.coreutils}/bin/cat > "${stateDir}/Common.ini" <<'EOF'
+    [SET]
+    DataSavePath=${stateDir}/Setting
+    ModulePath=${stateDir}
+    ModuleLibPath=${stateDir}/lib/edcb
+    BSBasicOnly=0
+    CS1BasicOnly=1
+    CS2BasicOnly=1
+    CS3BasicOnly=1
+    RecInfoDelFile=0
+    EOF
+        fi
+
+        if [ ! -e "${stateDir}/EpgDataCap_Bon.ini" ]; then
+          ${pkgs.coreutils}/bin/cat > "${stateDir}/EpgDataCap_Bon.ini" <<'EOF'
+    [SET_TCP]
+    IP0=1
+    Port0=0
+    Count=1
+    [SET]
+    SaveLogo=1
+    SaveLogoTypeFlags=32
+    RecFileName=$DYYYY$$DMM$$DDD$-$THH$$TMM$$TSS$-$ServiceName$.ts
+    EOF
+        fi
+
             ${linkEdcbLibs}
             ${setupBonDriver}
   '';
