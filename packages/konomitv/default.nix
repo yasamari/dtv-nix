@@ -1,4 +1,9 @@
-{ perSystem, pkgs, ... }:
+{
+  perSystem,
+  pkgs,
+  useLegacyQsvenc ? false,
+  ...
+}:
 let
   lib = pkgs.lib;
   python = pkgs.python313;
@@ -8,7 +13,11 @@ let
   psisimux = perSystem.self.psisimux;
   tsreadex = perSystem.self.tsreadex;
   psisiarc = perSystem.self.psisiarc;
-  qsvenc = if pkgs.stdenv.hostPlatform.isx86_64 then perSystem.self.qsvenc else null;
+  qsvenc =
+    if pkgs.stdenv.hostPlatform.isx86_64 then
+      if useLegacyQsvenc then perSystem.self."qsvenc-legacy" else perSystem.self.qsvenc
+    else
+      null;
   nvenc = if pkgs.stdenv.hostPlatform.isx86_64 then perSystem.self.nvenc else null;
 
   asyncioAtexit = py.buildPythonPackage rec {

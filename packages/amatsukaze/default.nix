@@ -1,4 +1,9 @@
-{ perSystem, pkgs, ... }:
+{
+  perSystem,
+  pkgs,
+  useLegacyQsvenc ? false,
+  ...
+}:
 let
   lib = pkgs.lib;
 
@@ -20,7 +25,7 @@ let
   yadifmod2 = perSystem.self.yadifmod2;
   tivtc = perSystem.self.tivtc;
 
-  qsvenc = perSystem.self.qsvenc;
+  qsvenc = if useLegacyQsvenc then perSystem.self."qsvenc-legacy" else perSystem.self.qsvenc;
   nvenc = perSystem.self.nvenc;
   tsreplace = perSystem.self.tsreplace;
   tsreadex = perSystem.self.tsreadex;
