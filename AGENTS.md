@@ -1,160 +1,174 @@
-# Agent Guide for dtv-nix
+# AGENTS.md for dtv-nix
 
-This guide is for coding agents working in this repository.
-It defines build/check workflows and project coding conventions.
+This guide is for autonomous coding agents working in this repository.
+Use it as the default contract for edits, validation, and style.
 
-## Scope and Stack
-- Primary language: Nix (`.nix`) with embedded Bash in build/service helpers.
-- Main purpose: package definitions and NixOS modules for Japanese DTV tooling.
-- Build system: Nix flakes (Blueprint-style outputs).
-- Formatter: `nixfmt-tree` via flake output `formatter`.
-- Validation style: derivation builds and flake checks, not unit-test suites.
+## 1) Repository Scope
+- Primary language: Nix (`.nix`) with embedded Bash in derivations/modules.
+- Project type: Nix flake exposing packages and NixOS modules for DTV tooling.
+- Validation model: Nix builds and checks, not a unit-test framework.
+- Formatter: `nix fmt` via flake `formatter` output (`nixfmt-tree`).
 
-## Cursor/Copilot Rules
-Checked paths:
+## 2) Rule File Precedence (Cursor/Copilot)
+Always check for additional rule files before editing:
 - `.cursorrules`
 - `.cursor/rules/`
 - `.github/copilot-instructions.md`
-Status:
-- No Cursor rules files were found.
-- No Copilot instructions file was found.
-- If these files are added later, treat them as higher-priority constraints.
 
-## Repository Layout
-- `flake.nix` / `flake.lock`: flake inputs and outputs.
-- `packages/<name>/default.nix`: one derivation (or wrapper) per package.
-- `modules/nixos/<name>.nix` and `modules/nixos/<name>/default.nix`: NixOS modules.
-- `scanned/`: scanned runtime/channel artifacts, not primary packaging logic.
-- `result` and `result-*`: local build outputs, ignored by git.
+Status at time of writing:
+- `.cursorrules`: not found
+- `.cursor/rules/`: not found
+- `.github/copilot-instructions.md`: not found
 
-## Build, Lint, and Test Commands
-Run commands from repo root: `/home/nina/Documents/projects/dtv-nix`.
+If these files are later added, treat them as higher priority than this file.
 
-### Discover outputs and attrs
+## 3) Repository Layout
+- `flake.nix`, `flake.lock`: flake inputs/outputs and pinning.
+- `packages/<name>/default.nix`: package derivations and wrappers.
+- `modules/nixos/*.nix`: NixOS service modules.
+- `modules/nixos/edcb/default.nix`: EDCB module directory form.
+- `modules/nixos/dtv.nix`: aggregate module importing multiple services.
+- `result`, `result-*`: local build symlinks from `nix build`.
+
+## 4) Build, Lint, and Test Commands
+Run commands from repo root
+
+### 4.1 Discover attrs before building
 ```bash
 nix flake show
 nix flake show --all-systems
 ```
-Use this first to confirm package/check attribute names.
+Use this to confirm exact package/check names.
 
-### Formatting / linting
+### 4.2 Formatting (lint equivalent)
 ```bash
-# Canonical formatter
 nix fmt
-
-# Equivalent explicit formatter invocation
+```
+Equivalent explicit form:
+```bash
 nix run .#formatter -- .
 ```
 Notes:
-- No dedicated lint stack is wired in (no statix/deadnix/treefmt config in-repo).
-- `nix fmt` is the expected formatting step for `.nix` files.
+- No dedicated lint stack (statix/deadnix/treefmt) is committed.
+- Formatting is expected for every Nix change.
 
-### Build a package
+### 4.3 Build a single package
 ```bash
-# Shorthand attrs
 nix build -L .#akebi
+nix build -L .#edcb
 nix build -L .#konomitv
-
-# System-qualified attr
-nix build -L .#packages.x86_64-linux.akebi
 ```
-Useful options:
-- `-L`: keep full logs.
-- `--no-link`: validate build without creating `./result` symlink.
-
-### Run checks
+System-qualified form:
 ```bash
-# All checks for host system
-nix flake check -L
+nix build -L .#packages.x86_64-linux.edcb
+```
+Helpful flags:
+- `-L` shows full logs.
+- `--no-link` builds without writing `./result`.
 
-# All checks for all systems declared in flake outputs
+### 4.4 Run complete checks
+```bash
+nix flake check -L
 nix flake check -L --all-systems
 ```
 
-### Run a single test/check (important)
-In this repo, a "single test" means building one check derivation.
-```bash
-# Single check on x86_64-linux
-nix build -L .#checks.x86_64-linux.pkgs-akebi
+### 4.5 Run one test/check (important)
+In this repo, a "single test" usually means building one check derivation.
 
-# Another single-check example
-nix build -L .#checks.x86_64-linux.pkgs-edcb
-```
-Portable host-system variant:
+Portable host-system form:
 ```bash
 SYSTEM="$(nix eval --impure --raw --expr builtins.currentSystem)"
-nix build -L .#checks.${SYSTEM}.pkgs-akebi
+nix build -L .#checks.${SYSTEM}.pkgs-edcb
 ```
 
-### Fast eval-only sanity checks
+Direct examples:
 ```bash
-# Evaluate flake without building derivations
-nix flake check --no-build
-
-# Inspect one attribute quickly
-nix eval --raw .#edcb.pname
+nix build -L .#checks.x86_64-linux.pkgs-akebi
+nix build -L .#checks.x86_64-linux.pkgs-konomitv
+nix build -L .#checks.aarch64-linux.pkgs-tsreadex
 ```
 
-## Code Style Guidelines
-These conventions are inferred from current files under `packages/` and `modules/nixos/`.
+### 4.6 Eval-only quick sanity
+```bash
+nix flake check --no-build
+nix eval --raw .#packages.x86_64-linux.edcb.pname
+```
 
-### 1) Imports and argument style
-- Prefer top-level argument sets: `{ pkgs, ... }:` or `{ perSystem, pkgs, ... }:`.
-- For modules, use curried form when needed: `{ flake, ... }:` then `{ config, lib, pkgs, ... }:`.
-- Keep module arg order stable: `config`, `lib`, `pkgs`, then `...`.
-- In modules, bind `cfg = config.services.<name>` near the top.
-- Group `let` bindings by purpose (defaults, helpers, scripts, then body).
+## 5) Code Style Guidelines
+Conventions below are inferred from existing `packages/` and `modules/nixos/` files.
 
-### 2) Formatting and structure
+### 5.1 Imports and function arguments
+- Prefer argument-set signatures: `{ pkgs, ... }:` or `{ perSystem, pkgs, ... }:`.
+- For modules needing flake attrs, use curried form: `{ flake, ... }:` then `{ config, lib, pkgs, ... }:`.
+- Keep module argument order stable: `config`, `lib`, `pkgs`, `...`.
+- Define `cfg = config.services.<name>;` near the top of the module `let` block.
+
+### 5.2 Formatting and structure
 - Run `nix fmt` after edits.
 - Use two-space indentation and no tabs.
-- Follow `nixfmt` output for braces, semicolons, and list/attrset layout.
-- Prefer multiline lists/attrsets once lines stop being immediately readable.
-- Keep substantial shell snippets in `'' ... ''` blocks.
+- Prefer multiline attrsets/lists when one-line readability drops.
+- Keep shell snippets in `'' ... ''` blocks.
+- Group `let` bindings by concern (defaults, helpers, generated scripts).
 
-### 3) Types and options in NixOS modules
-- Use `lib.mkOption` / `lib.mkEnableOption` for all options.
-- Always set explicit option types (`lib.types.bool`, `lib.types.str`, `lib.types.package`, etc.).
-- Constrain ports with `lib.types.ints.between`.
-- Provide `default` and meaningful `description` for options.
+### 5.3 Types and module options
+- Use `lib.mkOption` / `lib.mkEnableOption` for module options.
+- Always specify explicit types (`bool`, `str`, `path`, `package`, etc.).
+- Use constrained types for ports (`lib.types.ints.between` / `lib.types.ints.port`).
+- Include `default` and clear `description` for each option.
 - Use `defaultText = lib.literalExpression ...` when defaults reference flake attrs.
 - Gate emitted config with `lib.mkIf cfg.enable`.
 
-### 4) Naming conventions
-- Keep package directory names lowercase; preserve existing underscore names (for example `chapter_exe`).
-- In derivations, set `pname` and `version` explicitly.
-- Use `rec` when `version` or other attrs are referenced in the same derivation.
-- Use descriptive helper names (`stateDir`, `defaultUser`, `runtimeTools`, `pythonEnv`).
-- Name scripts by action (`edcb-initialize-state`, `konomitv-prepare-config`).
+### 5.4 Derivations, dependencies, and pinning
+- Set `pname` and `version` explicitly.
+- Use `rec` when attributes reference each other.
+- Prefer `strictDeps = true;` for non-trivial derivations.
+- Keep dependency roles clear:
+  - `nativeBuildInputs`: build-time tools
+  - `buildInputs`: libs/tools used during build/runtime
+  - `propagatedBuildInputs`: dependencies that must propagate to consumers
+- Preserve standard hooks (`runHook preBuild`, `postBuild`, etc.).
+- Use `substituteInPlace --replace-fail` for deterministic source patching.
+- Pin fetches with fixed `rev`/`tag` and `hash`.
 
-### 5) Build and dependency conventions
-- Prefer `strictDeps = true;` for non-trivial builds where applicable.
-- Keep dependency roles clear: `nativeBuildInputs` for build tools, `buildInputs` for runtime/build deps.
-- Fetch sources with pinned hashes (`pkgs.fetchFromGitHub` / `pkgs.fetchurl`).
-- Prefer deterministic refs (`tag` or pinned `rev`).
-- Use `substituteInPlace --replace-fail` for source patching.
-- Preserve standard hooks in custom phases (`runHook preBuild`, `postBuild`, etc.).
+### 5.5 Naming conventions
+- Package directory names are lowercase.
+- Preserve existing underscore names (for example `chapter_exe`, `join_logo_scp`).
+- Use descriptive helper names (`stateDir`, `runtimeTools`, `pythonEnv`).
+- Name generated scripts by action (`edcb-initialize-state`, `amatsukaze-initialize-state`).
 
-### 6) Error handling and shell practices
-- Start shell scripts with strict mode (`set -eu` or `set -eo pipefail`).
-- Quote variable expansions unless intentional globbing is needed.
-- Validate required files/dirs and fail with clear messages.
-- Use explicit tool paths in scripts where needed (`${pkgs.coreutils}/bin/...`).
-- Prefer `makeWrapper` / `wrapProgram` over manual PATH mutation.
-- In modules, prefer `lib.getExe cfg.package` for service `ExecStart` where applicable.
+### 5.6 Shell and error handling
+- Start scripts with strict mode: `set -eu` or `set -eo pipefail`.
+- Quote variable expansions unless intentional splitting/globbing is required.
+- Validate required files/dirs before use.
+- Emit clear failures (`echo "..." >&2; exit 1`) for missing prerequisites.
+- Prefer explicit Nix store tool paths in scripts when needed.
+- Prefer `makeWrapper` / `wrapProgram` over ad-hoc PATH mutation.
 
-### 7) Platform/metadata conventions
-- Declare supported platforms with `meta.platforms`.
-- Gate x86_64-only behavior with `pkgs.stdenv.hostPlatform.isx86_64`.
-- Keep hardware-specific choices explicit (Intel/NVIDIA runtime logic, CUDA flags).
-- Keep `meta` fields complete and consistent: `description`, `homepage`, `license`, `platforms`.
-- Set `mainProgram` when a principal executable exists.
+### 5.7 Service and platform patterns
+- Use explicit service users/groups and state directories.
+- Prefer `ExecStart = lib.getExe cfg.package;` when package has `mainProgram`.
+- Keep firewall behavior opt-in (`openFirewall = false` default).
+- Gate architecture-specific behavior with `pkgs.stdenv.hostPlatform` checks.
+- Keep x86_64-only encoder wiring explicit and isolated.
 
-## Agent Change Checklist
-1. Run `nix fmt` on changed Nix files.
-2. Build the smallest relevant package target (for example `nix build -L .#tsreadex`).
-3. Run one relevant single-check target (for example `nix build -L .#checks.x86_64-linux.pkgs-tsreadex`).
-4. If the change is broad, run `nix flake check -L`.
-5. Confirm no accidental edits to scanned/generated artifacts unless requested.
+### 5.8 Metadata conventions
+- Keep `meta` fields consistent: `description`, `homepage`, `license`, `platforms`.
+- Set `meta.mainProgram` when a primary executable exists.
+- Keep platform declarations explicit (`platforms.linux` or exact list).
 
-Keep changes minimal, reproducible, and aligned with existing Nix idioms in this repository.
+## 6) Agent Workflow Checklist
+1. Check for Cursor/Copilot rule files.
+2. Confirm attrs with `nix flake show --all-systems` when unsure.
+3. Make minimal edits focused on the requested behavior.
+4. Run `nix fmt`.
+5. Build the smallest affected package.
+6. Run one relevant single-check derivation.
+7. Run full `nix flake check -L` only for broad/cross-package changes.
+
+## 7) Safety and Hygiene
+- Do not edit `flake.lock` unless dependency updates are requested.
+- Do not commit `result` symlinks or machine-local artifacts.
+- Avoid unrelated refactors in focused change requests.
+- Keep option descriptions aligned with existing language/style.
+
+Use this document as the baseline guidance for autonomous edits in this repo.
