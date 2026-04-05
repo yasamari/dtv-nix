@@ -45,6 +45,9 @@ let
     set -eu
 
     libDir="${stateDir}/lib"
+    httpPublicDir="${stateDir}/HttpPublic"
+    packageHttpPublicDir="${cfg.package}/share/edcb/ini/HttpPublic"
+    packageSettingDir="${cfg.package}/share/edcb/ini/Setting"
 
     mkdir -p "$libDir"
 
@@ -64,12 +67,20 @@ let
       install -m 0644 "${cfg.package}/share/edcb/ini/ContentTypeText.txt" "${stateDir}/ContentTypeText.txt"
     fi
 
-    if [ ! -e "${stateDir}/HttpPublic" ]; then
-      cp -a "${cfg.package}/share/edcb/ini/HttpPublic" "${stateDir}/HttpPublic"
+    if [ ! -e "$httpPublicDir" ]; then
+      ln -s "$packageHttpPublicDir" "$httpPublicDir"
+    fi
+
+    if [ ! -e "$settingDir/HttpPublic.ini" ]; then
+      install -m 0644 "$packageSettingDir/HttpPublic.ini" "$settingDir/HttpPublic.ini"
+    fi
+
+    if [ ! -e "$settingDir/XCODE_OPTIONS.lua" ]; then
+      install -m 0644 "$packageSettingDir/XCODE_OPTIONS.lua" "$settingDir/XCODE_OPTIONS.lua"
     fi
 
     if [ ! -e "${stateDir}/EpgTimerSrv.ini" ]; then
-          install -m 0644 "${./EpgTimerSrv.ini}" "${stateDir}/EpgTimerSrv.ini"
+      install -m 0644 "${./EpgTimerSrv.ini}" "${stateDir}/EpgTimerSrv.ini"
     fi
 
     ${linkEdcbLibs}
