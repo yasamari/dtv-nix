@@ -19,6 +19,31 @@ let
     "RecName_Macro.so"
   ];
 
+  postCommandFiles = {
+    PostRecEnd = cfg.postRecEndCommand;
+    PostAddReserve = cfg.postAddReserveCommand;
+    PostChgReserve = cfg.postChgReserveCommand;
+    PostRecStart = cfg.postRecStartCommand;
+    PostNotify = cfg.postNotifyCommand;
+  };
+
+  postCommandSetup = lib.concatStringsSep "\n" (
+    lib.mapAttrsToList (
+      name: command:
+      let
+        script = if command == null then null else pkgs.writeShellScript "${name}.sh" command;
+      in
+      if command == null then
+        ''
+          rm -f "${stateDir}/${name}.sh"
+        ''
+      else
+        ''
+          ln -sfn "${script}" "${stateDir}/${name}.sh"
+        ''
+    ) postCommandFiles
+  );
+
   linkEdcbLibs = lib.concatStringsSep "\n" (
     map (name: ''
       ln -sfn "${cfg.package}/lib/edcb/${name}" "$libDir/${name}"
@@ -83,6 +108,8 @@ let
       install -m 0644 "${./EpgTimerSrv.ini}" "${stateDir}/EpgTimerSrv.ini"
     fi
 
+    ${postCommandSetup}
+
     ${linkEdcbLibs}
 
     srcSo="${bonDriver}/lib/edcb/BonDriver_LinuxMirakc.so"
@@ -146,6 +173,36 @@ in
       type = lib.types.ints.port;
       default = 4510;
       description = "ファイアウォール開放で使用する EDCB TCP ポート番号。";
+    };
+
+    postRecEndCommand = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "録画終了後に実行するコマンド。";
+    };
+
+    postAddReserveCommand = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "録画予約を追加したときに実行するコマンド。";
+    };
+
+    postChgReserveCommand = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "録画予約を変更したときに実行するコマンド。";
+    };
+
+    postRecStartCommand = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "録画を開始したときに実行するコマンド。";
+    };
+
+    postNotifyCommand = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "更新通知が送られたときに実行するコマンド。";
     };
 
     bonDriver = {
