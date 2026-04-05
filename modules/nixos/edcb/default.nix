@@ -209,17 +209,17 @@ in
       multiChSet4File = lib.mkOption {
         type = lib.types.nullOr lib.types.path;
         default = null;
-        description = "BonDriver_mirakc(LinuxMirakc).ChSet4.txtのパス。";
+        description = "BonDriver_mirakc(BonDriver_mirakc).ChSet4.txtのパス。";
       };
       terrestrialChSet4File = lib.mkOption {
         type = lib.types.nullOr lib.types.path;
         default = null;
-        description = "BonDriver_mirakc_T(LinuxMirakc).ChSet4.txtのパス。";
+        description = "BonDriver_mirakc_T(BonDriver_mirakc).ChSet4.txtのパス。";
       };
       satelliteChSet4File = lib.mkOption {
         type = lib.types.nullOr lib.types.path;
         default = null;
-        description = "BonDriver_mirakc_S(LinuxMirakc).ChSet4.txtのパス。";
+        description = "BonDriver_mirakc_S(BonDriver_mirakc).ChSet4.txtのパス。";
       };
 
       chSet5File = lib.mkOption {
