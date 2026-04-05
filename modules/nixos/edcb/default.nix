@@ -21,85 +21,73 @@ let
 
   linkEdcbLibs = lib.concatStringsSep "\n" (
     map (name: ''
-      ${pkgs.coreutils}/bin/ln -sfn "${cfg.package}/lib/edcb/${name}" "$libDir/${name}"
+      ln -sfn "${cfg.package}/lib/edcb/${name}" "$libDir/${name}"
     '') edcbLibs
   );
 
   bonDriver = flake.packages.${pkgs.stdenv.hostPlatform.system}.bondriver_linuxmirakc;
 
-  setupBonDriver = ''
-    srcSo="${bonDriver}/lib/edcb/BonDriver_LinuxMirakc.so"
-
-    if [ -f "$srcSo" ]; then
-      ${pkgs.coreutils}/bin/install -m 0644 "$srcSo" "$libDir/BonDriver_LinuxMirakc.so"
-      ${pkgs.coreutils}/bin/install -m 0644 "$srcSo" "$libDir/BonDriver_LinuxMirakc_T.so"
-      ${pkgs.coreutils}/bin/install -m 0644 "$srcSo" "$libDir/BonDriver_LinuxMirakc_S.so"
-    fi
-  '';
+  generateBonDriverIni =
+    priority:
+    lib.generators.toINI { } {
+      GLOBAL = {
+        SERVER_HOST = cfg.bonDriver.mirakc.host;
+        SERVER_PORT = cfg.bonDriver.mirakc.port;
+        SERVER_SOCKPATH = cfg.bonDriver.mirakc.socketPath;
+        SERVER_TYPE = cfg.bonDriver.mirakc.serverType;
+        DECODE_B25 = 1;
+        PRIORITY = priority;
+        SERVICE_SPLIT = 0;
+      };
+    };
 
   initializeState = pkgs.writeShellScript "edcb-initialize-state" ''
-            set -eu
+    set -eu
 
-            libDir="${stateDir}/lib"
+    libDir="${stateDir}/lib"
 
-            ${pkgs.coreutils}/bin/mkdir -p "$libDir"
+    mkdir -p "$libDir"
 
-            if [ ! -e "${stateDir}/Bitrate.ini" ]; then
-              ${pkgs.coreutils}/bin/install -m 0644 "${cfg.package}/share/edcb/ini/Bitrate.ini" "${stateDir}/Bitrate.ini"
-            fi
+    settingDir="${stateDir}/Setting"
 
-            if [ ! -e "${stateDir}/BonCtrl.ini" ]; then
-              ${pkgs.coreutils}/bin/install -m 0644 "${cfg.package}/share/edcb/ini/BonCtrl.ini" "${stateDir}/BonCtrl.ini"
-            fi
+    mkdir -p "$settingDir"
 
-            if [ ! -e "${stateDir}/ContentTypeText.txt" ]; then
-              ${pkgs.coreutils}/bin/install -m 0644 "${cfg.package}/share/edcb/ini/ContentTypeText.txt" "${stateDir}/ContentTypeText.txt"
-            fi
+    if [ ! -e "${stateDir}/Bitrate.ini" ]; then
+      install -m 0644 "${cfg.package}/share/edcb/ini/Bitrate.ini" "${stateDir}/Bitrate.ini"
+    fi
 
-            if [ ! -e "${stateDir}/HttpPublic" ]; then
-              ${pkgs.coreutils}/bin/cp -a "${cfg.package}/share/edcb/ini/HttpPublic" "${stateDir}/HttpPublic"
-            fi
+    if [ ! -e "${stateDir}/BonCtrl.ini" ]; then
+      install -m 0644 "${cfg.package}/share/edcb/ini/BonCtrl.ini" "${stateDir}/BonCtrl.ini"
+    fi
 
-        if [ ! -e "${stateDir}/EpgTimerSrv.ini" ]; then
-          ${pkgs.coreutils}/bin/cat > "${stateDir}/EpgTimerSrv.ini" <<'EOF'
-    [SET]
-    EnableHttpSrv=2
-    HttpAccessControlList=+127.0.0.0/8,+10.0.0.0/8,+172.16.0.0/12,+192.168.0.0/16,+169.254.0.0/16,+100.64.0.0/10
-    EnableTCPSrv=1
-    TCPIPv6=0
-    TCPAccessControlList=+127.0.0.0/8,+10.0.0.0/8,+172.16.0.0/12,+192.168.0.0/16,+169.254.0.0/16,+100.64.0.0/10
-    EOF
-        fi
+    if [ ! -e "${stateDir}/ContentTypeText.txt" ]; then
+      install -m 0644 "${cfg.package}/share/edcb/ini/ContentTypeText.txt" "${stateDir}/ContentTypeText.txt"
+    fi
 
-        if [ ! -e "${stateDir}/Common.ini" ]; then
-          ${pkgs.coreutils}/bin/cat > "${stateDir}/Common.ini" <<'EOF'
-    [SET]
-    DataSavePath=${stateDir}/Setting
-    ModulePath=${stateDir}
-    ModuleLibPath=${stateDir}/lib/edcb
-    BSBasicOnly=0
-    CS1BasicOnly=1
-    CS2BasicOnly=1
-    CS3BasicOnly=1
-    RecInfoDelFile=0
-    EOF
-        fi
+    if [ ! -e "${stateDir}/HttpPublic" ]; then
+      cp -a "${cfg.package}/share/edcb/ini/HttpPublic" "${stateDir}/HttpPublic"
+    fi
 
-        if [ ! -e "${stateDir}/EpgDataCap_Bon.ini" ]; then
-          ${pkgs.coreutils}/bin/cat > "${stateDir}/EpgDataCap_Bon.ini" <<'EOF'
-    [SET_TCP]
-    IP0=1
-    Port0=0
-    Count=1
-    [SET]
-    SaveLogo=1
-    SaveLogoTypeFlags=32
-    RecFileName=$DYYYY$$DMM$$DDD$-$THH$$TMM$$TSS$-$ServiceName$.ts
-    EOF
-        fi
+    if [ ! -e "${stateDir}/EpgTimerSrv.ini" ]; then
+          install -m 0644 "${./EpgTimerSrv.ini}" "${stateDir}/EpgTimerSrv.ini"
+    fi
 
-            ${linkEdcbLibs}
-            ${setupBonDriver}
+    ${linkEdcbLibs}
+
+    srcSo="${bonDriver}/lib/edcb/BonDriver_LinuxMirakc.so"
+
+    install -m 0644 "$srcSo" "$libDir/BonDriver_LinuxMirakc.so"
+    install -m 0644 "$srcSo" "$libDir/BonDriver_LinuxMirakc_T.so"
+    install -m 0644 "$srcSo" "$libDir/BonDriver_LinuxMirakc_S.so"
+
+    install -m 0644 "${cfg.bonDriver.chSet5File}" "$settingDir/ChSet5.txt"
+    install -m 0644 "${cfg.bonDriver.multiChSet4File}" "$settingDir/BonDriver_LinuxMirakc(LinuxMirakc).ChSet4.txt"
+    install -m 0644 "${cfg.bonDriver.terrestrialChSet4File}" "$settingDir/BonDriver_LinuxMirakc_T(LinuxMirakc).ChSet4.txt"
+    install -m 0644 "${cfg.bonDriver.satelliteChSet4File}" "$settingDir/BonDriver_LinuxMirakc_S(LinuxMirakc).ChSet4.txt"
+
+    install -m 0644 "${pkgs.writeText "BonDriver_LinuxMirakc.so.ini" (generateBonDriverIni 8)}" "$libDir/BonDriver_LinuxMirakc.so.ini"
+    install -m 0644 "${pkgs.writeText "BonDriver_LinuxMirakc_T.so.ini" (generateBonDriverIni 9)}" "$libDir/BonDriver_LinuxMirakc_T.so.ini"
+    install -m 0644 "${pkgs.writeText "BonDriver_LinuxMirakc_S.so.ini" (generateBonDriverIni 10)}" "$libDir/BonDriver_LinuxMirakc_S.so.ini"
   '';
 in
 {
@@ -144,9 +132,62 @@ in
     };
 
     tcpPort = lib.mkOption {
-      type = lib.types.ints.between 1 65535;
+      type = lib.types.ints.port;
       default = 4510;
       description = "ファイアウォール開放で使用する EDCB TCP ポート番号。";
+    };
+
+    bonDriver = {
+      multiChSet4File = lib.mkOption {
+        type = lib.types.nullOr lib.types.path;
+        default = null;
+        description = "BonDriver_mirakc(LinuxMirakc).ChSet4.txtのパス。";
+      };
+      terrestrialChSet4File = lib.mkOption {
+        type = lib.types.nullOr lib.types.path;
+        default = null;
+        description = "BonDriver_mirakc_T(LinuxMirakc).ChSet4.txtのパス。";
+      };
+      satelliteChSet4File = lib.mkOption {
+        type = lib.types.nullOr lib.types.path;
+        default = null;
+        description = "BonDriver_mirakc_S(LinuxMirakc).ChSet4.txtのパス。";
+      };
+
+      chSet5File = lib.mkOption {
+        type = lib.types.nullOr lib.types.path;
+        default = null;
+        description = "ChSet5.txtのパス。";
+      };
+
+      mirakc = {
+        serverType = lib.mkOption {
+          type = lib.types.enum [
+            "http"
+            "unix"
+          ];
+          default = if config.services.mirakurun.enable then "unix" else "http";
+          description = "Mirakurunに接続する方法。unixかhttpを選択します。";
+        };
+
+        socketPath = lib.mkOption {
+          type = lib.types.path;
+          default = config.services.mirakurun.unixSocket;
+          description = "MirakurunのUNIXドメインソケットのパス。serverTypeがhttpの場合は使用されません。";
+        };
+
+        host = lib.mkOption {
+          type = lib.types.str;
+          default = "127.0.0.1";
+          description = "Mirakurunのホスト名またはIPアドレス。serverTypeがunixの場合は使用されません。";
+        };
+
+        port = lib.mkOption {
+          type = lib.types.ints.between 1 65534;
+          default = 40772;
+          description = "Mirakurunのポート番号。serverTypeがunixの場合は使用されません。";
+        };
+      };
     };
   };
 
