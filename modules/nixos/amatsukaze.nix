@@ -104,6 +104,7 @@ in
         ExecStart = "${lib.getExe cfg.package} --port ${toString cfg.port}";
         Restart = "on-failure";
         RestartSec = 5;
+        KillSignal = "SIGINT";
       };
     };
   };
