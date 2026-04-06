@@ -34,14 +34,6 @@ let
   chapterExe = perSystem.self.chapter_exe;
   joinLogoScp = perSystem.self.join_logo_scp;
 
-  fdkaac =
-    if pkgs ? "fdk-aac-encoder" then
-      pkgs."fdk-aac-encoder"
-    else if pkgs ? fdk_aac then
-      pkgs.fdk_aac
-    else
-      throw "Neither fdk-aac-encoder nor fdk_aac is available in nixpkgs";
-
   runtimeTools = [
     ffmpeg
     pkgs.x264
@@ -58,7 +50,7 @@ let
     b24tovtt
     chapterExe
     joinLogoScp
-    fdkaac
+    pkgs.fdk-aac-encoder
     pkgs.opusTools
     pkgs.whisper-cpp
   ];
