@@ -20,7 +20,8 @@ pkgs.stdenv.mkDerivation {
 
   preConfigure = ''
     substituteInPlace nnedi3/meson.build \
-      --replace "install_dir : get_option('libdir')" "install_dir : 'lib/avisynth'"
+      --replace-fail "install_dir : get_option('libdir')" "install_dir : 'lib/avisynth'" \
+      --replace-fail "  link_args : link_args," "  link_args : link_args + [ '-Wl,-z,noexecstack' ],"
   '';
 
   meta = with pkgs.lib; {
