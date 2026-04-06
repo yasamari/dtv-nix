@@ -29,8 +29,35 @@ pkgs.stdenv.mkDerivation rec {
   };
 
   postPatch = ''
-    substituteInPlace meson.build \
-      --replace-fail "cuda_dep = dependency('cuda', version : '>=11.0', required : true)" "cuda_dep = declare_dependency()"
+      substituteInPlace meson.build \
+        --replace-fail "cuda_dep = dependency('cuda', version : '>=11.0', required : true)" "cuda_dep = declare_dependency()"
+
+      printf '%s\n' \
+        '#include <cstdint>' \
+        '#include "rgy_codepage.h"' \
+        'const char *codepage_str(uint32_t codepage) {' \
+        '  switch (codepage) {' \
+        '  case CODE_PAGE_SJIS:' \
+        '    return "CP932";' \
+        '  case CODE_PAGE_EUC_JP:' \
+        '    return "EUC-JP";' \
+        '  case CODE_PAGE_UTF16_LE:' \
+        '    return "UTF16LE";' \
+        '  case CODE_PAGE_UTF16_BE:' \
+        '    return "UTF16BE";' \
+        '  case CODE_PAGE_JIS:' \
+        '    return "ISO2022JP";' \
+        '  case CODE_PAGE_UTF8:' \
+        '    return "UTF-8";' \
+        '  default:' \
+        '    return nullptr;' \
+        '  }' \
+        '}' \
+        > common/rgy_codepage_compat.cpp
+
+      substituteInPlace common/meson.build \
+        --replace-fail "  'rgy_filesystem.cpp'," "  'rgy_filesystem.cpp',
+    'rgy_codepage_compat.cpp',"
   '';
 
   postInstall = ''
