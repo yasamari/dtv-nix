@@ -214,11 +214,11 @@ pkgs.stdenv.mkDerivation rec {
       "${avisynthplusCuda}/lib/avisynth" \
       "${avisynthcudafilters}/lib/avisynth" \
       "${nnedi3}/lib/avisynth" \
-      "${masktools}/lib" \
-      "${mvtools}/lib" \
-      "${rgtools}/lib" \
-      "${yadifmod2}/lib" \
-      "${tivtc}/lib"; do
+      "${masktools}/lib/avisynth" \
+      "${mvtools}/lib/avisynth" \
+      "${rgtools}/lib/avisynth" \
+      "${yadifmod2}/lib/avisynth" \
+      "${tivtc}/lib/avisynth"; do
       if [ -d "$pluginPath" ]; then
         for plugin in "$pluginPath"/*.so*; do
           ln -sf "$plugin" "$exeDir/plugins64/"
