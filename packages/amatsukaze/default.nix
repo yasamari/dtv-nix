@@ -226,6 +226,12 @@ pkgs.stdenv.mkDerivation rec {
       fi
     done
 
+    if [ -e "${masktools}/lib/avisynth/mt_masktools.so" ]; then
+      ln -sf "${masktools}/lib/avisynth/mt_masktools.so" "$exeDir/plugins64/mt_masktools.so"
+    elif [ -e "${masktools}/lib/avisynth/libmasktools2.so" ]; then
+      ln -sf "${masktools}/lib/avisynth/libmasktools2.so" "$exeDir/plugins64/mt_masktools.so"
+    fi
+
     makeWrapper "$exeDir/AmatsukazeCLI" "$out/bin/AmatsukazeCLI" \
       --prefix PATH : "${runtimePath}"
 
