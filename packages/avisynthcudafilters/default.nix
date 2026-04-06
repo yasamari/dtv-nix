@@ -58,6 +58,9 @@ pkgs.stdenv.mkDerivation rec {
       substituteInPlace common/meson.build \
         --replace-fail "  'rgy_filesystem.cpp'," "  'rgy_filesystem.cpp',
     'rgy_codepage_compat.cpp',"
+
+      substituteInPlace NNEDI3/nnedi3/meson.build \
+        --replace-fail "  link_args : link_args," "  link_args : link_args + [ '-Wl,-z,noexecstack' ],"
   '';
 
   postInstall = ''
