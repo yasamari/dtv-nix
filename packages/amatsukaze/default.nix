@@ -170,15 +170,12 @@ pkgs.stdenv.mkDerivation rec {
     runHook preInstall
 
     exeDir="$out/lib/amatsukaze/exe_files"
-    cliDir="$out/lib/amatsukaze/cli"
     shareDir="$out/share/amatsukaze"
 
-    mkdir -p "$out/bin" "$out/lib/amatsukaze" "$exeDir" "$cliDir" "$shareDir"
+    mkdir -p "$out/bin" "$out/lib/amatsukaze" "$exeDir" "$shareDir"
 
-    install -Dm755 build/AmatsukazeCLI/AmatsukazeCLI "$cliDir/AmatsukazeCLI"
+    install -Dm755 build/AmatsukazeCLI/AmatsukazeCLI "$exeDir/AmatsukazeCLI"
     install -Dm755 build/Amatsukaze/libAmatsukaze.so "$exeDir/libAmatsukaze.so"
-
-    ln -s "$exeDir/libAmatsukaze.so" "$cliDir/libAmatsukaze.so"
 
     dotnetOutputDir=""
     for dir in x64/Release x64/Release/net* x64/Release/net*/linux-x64; do
@@ -229,7 +226,7 @@ pkgs.stdenv.mkDerivation rec {
       fi
     done
 
-    makeWrapper "$cliDir/AmatsukazeCLI" "$out/bin/AmatsukazeCLI" \
+    makeWrapper "$exeDir/AmatsukazeCLI" "$out/bin/AmatsukazeCLI" \
       --prefix PATH : "${runtimePath}"
 
     makeWrapper "${dotnetRuntime}/bin/dotnet" "$out/bin/AmatsukazeServerCLI" \
