@@ -64,6 +64,7 @@ let
   ];
 
   runtimePath = lib.makeBinPath ([ dotnetRuntime ] ++ runtimeTools);
+  cudaDriverLibraryPath = "/run/opengl-driver/lib:/run/opengl-driver-32/lib";
 in
 pkgs.stdenv.mkDerivation rec {
   pname = "amatsukaze";
@@ -233,20 +234,24 @@ pkgs.stdenv.mkDerivation rec {
     fi
 
     makeWrapper "$exeDir/AmatsukazeCLI" "$out/bin/AmatsukazeCLI" \
+      --prefix LD_LIBRARY_PATH : "${cudaDriverLibraryPath}" \
       --prefix PATH : "${runtimePath}"
 
     makeWrapper "${dotnetRuntime}/bin/dotnet" "$out/bin/AmatsukazeServerCLI" \
       --set DOTNET_ROOT "${dotnetRuntime}/share/dotnet" \
+      --prefix LD_LIBRARY_PATH : "${cudaDriverLibraryPath}" \
       --prefix PATH : "$out/bin:${runtimePath}" \
       --add-flags "$exeDir/AmatsukazeServerCLI.dll"
 
     makeWrapper "${dotnetRuntime}/bin/dotnet" "$out/bin/AmatsukazeAddTask" \
       --set DOTNET_ROOT "${dotnetRuntime}/share/dotnet" \
+      --prefix LD_LIBRARY_PATH : "${cudaDriverLibraryPath}" \
       --prefix PATH : "${runtimePath}" \
       --add-flags "$exeDir/AmatsukazeAddTask.dll"
 
     makeWrapper "${dotnetRuntime}/bin/dotnet" "$out/bin/ScriptCommand" \
       --set DOTNET_ROOT "${dotnetRuntime}/share/dotnet" \
+      --prefix LD_LIBRARY_PATH : "${cudaDriverLibraryPath}" \
       --prefix PATH : "${runtimePath}" \
       --add-flags "$exeDir/ScriptCommand.dll"
 
