@@ -19,6 +19,7 @@ let
     else
       null;
   nvenc = if pkgs.stdenv.hostPlatform.isx86_64 then perSystem.self.nvenc else null;
+  headlessBrowser = pkgs.chromium;
 
   asyncioAtexit = py.buildPythonPackage rec {
     pname = "asyncio-atexit";
@@ -434,6 +435,7 @@ pkgs.stdenv.mkDerivation rec {
     export KONOMITV_CONFIG_YAML_PATH
     export KONOMITV_DATA_DIR
     export KONOMITV_LOGS_DIR
+    export PATH="${headlessBrowser}/bin:$PATH"
 
     cd "\$template_dir/server"
     exec "${pythonEnv}/bin/python" KonomiTV.py "\$@"
