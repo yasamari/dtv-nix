@@ -60,13 +60,13 @@ let
 in
 pkgs.stdenv.mkDerivation rec {
   pname = "amatsukaze";
-  version = "1.0.6.3";
+  version = "1.0.6.4";
 
   src = pkgs.fetchFromGitHub {
     owner = "rigaya";
     repo = "Amatsukaze";
     tag = version;
-    hash = "sha256-9Q4h9AbN45dDrn6fCV3sFVRK3iXmrQU2zzCjKRVW5Us=";
+    hash = "sha256-nmobExV7gYT+x4+0F7REPd6v1o1JPcXltUuuo9JNb58=";
     fetchSubmodules = true;
   };
 
