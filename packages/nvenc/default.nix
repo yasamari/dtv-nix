@@ -4,7 +4,7 @@
 }:
 pkgs.stdenv.mkDerivation rec {
   pname = "nvenc";
-  version = "9.12";
+  version = "9.14";
 
   hardeningDisable = [ "all" ];
 
@@ -12,7 +12,7 @@ pkgs.stdenv.mkDerivation rec {
     owner = "rigaya";
     repo = "NVEnc";
     tag = version;
-    hash = "sha256-ZTrLMGgCAskOE4UX32hsMvO6lYL6tYaLMQ085AOfGmE=";
+    hash = "sha256-SK3RWlkHqmIQYWHkeqWTdH/oHPF/kultxWrQ/Yfe+wI=";
     fetchSubmodules = true;
   };
 
