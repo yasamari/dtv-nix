@@ -1,13 +1,13 @@
 { pkgs, ... }:
 pkgs.stdenv.mkDerivation rec {
   pname = "tsreadex";
-  version = "master-240517";
+  version = "master-a82528c";
 
   src = pkgs.fetchFromGitHub {
     owner = "xtne6f";
     repo = "tsreadex";
-    rev = version;
-    hash = "sha256-k7qq5a2ur/QhOZ+3AWysroRFRH/AY+wM581ahOH5PB8=";
+    rev = "a82528ccb698fcd07b4da1bb2243e63d685c34a7";
+    hash = "sha256-jszkLID4J0ECs688bj9qlntjZ7NHYi6fPRB1HR2acos=";
   };
 
   strictDeps = true;
