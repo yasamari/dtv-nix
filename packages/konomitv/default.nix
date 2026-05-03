@@ -26,8 +26,8 @@ let
     version = "1.0.1";
     format = "setuptools";
 
-    src = pkgs.fetchurl {
-      url = "https://files.pythonhosted.org/packages/22/d3/dd2974be3f67c7ec96e0d6ab454429d0372cb7c7bffa3d0ac67a483cb801/asyncio-atexit-1.0.1.tar.gz";
+    src = pkgs.fetchPypi {
+      inherit pname version;
       hash = "sha256-HQxxVEuO4sSE0yKETucsCHXd5vJQwO1baZNZKrn31DY=";
     };
 
@@ -51,8 +51,8 @@ let
     version = "1.3.1";
     format = "pyproject";
 
-    src = pkgs.fetchurl {
-      url = "https://files.pythonhosted.org/packages/26/a2/6f38b1de47b41ad0420047ad03b0b8cd5d6572271a3e9c2ab70e373fe63a/hashids-1.3.1.tar.gz";
+    src = pkgs.fetchPypi {
+      inherit pname version;
       hash = "sha256-bD3HdeZe/CziwVemWst3bWNMuBRZj0BkaavvAK4/Y1w=";
     };
 
@@ -73,8 +73,8 @@ let
     version = "0.6.0";
     format = "setuptools";
 
-    src = pkgs.fetchurl {
-      url = "https://files.pythonhosted.org/packages/ce/e7/bbaab0d2a33e07c8278910c1d0d8d4f3781293dfbc70b5c38197159046bf/grapheme-0.6.0.tar.gz";
+    src = pkgs.fetchPypi {
+      inherit pname version;
       hash = "sha256-RMK58hu+d8+wWDX+wjC9Q1lUJ1Jn/qGFgBOxAvhgPMo=";
     };
 
@@ -145,8 +145,9 @@ let
     version = "0.6.5";
     format = "pyproject";
 
-    src = pkgs.fetchurl {
-      url = "https://files.pythonhosted.org/packages/c2/06/89fe5fff93c5a01dbdeb9f3d843a7e997dc6e3a87222a260a164ff91fb81/pypika_tortoise-0.6.5.tar.gz";
+    src = pkgs.fetchPypi {
+      pname = "pypika_tortoise";
+      inherit version;
       hash = "sha256-ZNlsm4hFD2NgrSKnBjkztqkJYacxfwSytjyY/V1wVQY=";
     };
 
@@ -167,8 +168,9 @@ let
     version = "0.25.4";
     format = "pyproject";
 
-    src = pkgs.fetchurl {
-      url = "https://files.pythonhosted.org/packages/78/44/8a75e91a5d0e2e2545485de3e084fac1f4ff2ba4859e39240fa204c748d5/tortoise_orm-0.25.4.tar.gz";
+    src = pkgs.fetchPypi {
+      pname = "tortoise_orm";
+      inherit version;
       hash = "sha256-iMIx6+FY8Sh/yclJcxP5pGz7cLZsRYujmQCSGk5S0Bs=";
     };
 
@@ -197,8 +199,8 @@ let
     version = "0.9.1";
     format = "pyproject";
 
-    src = pkgs.fetchurl {
-      url = "https://files.pythonhosted.org/packages/a5/98/75c6e3053a14a14ffe86e2435698b960abe0bf03c114e67f966d92ff19e7/aerich-0.9.1.tar.gz";
+    src = pkgs.fetchPypi {
+      inherit pname version;
       hash = "sha256-Ypr771kCY1xB9BDdBd75hMAuBeYtiiAgIQoppKrhkAE=";
     };
 
@@ -228,8 +230,8 @@ let
     version = "0.15.3";
     format = "pyproject";
 
-    src = pkgs.fetchurl {
-      url = "https://files.pythonhosted.org/packages/bf/c1/3b453f2ca593bff7315ebeadad21f3d018ab26e5011b38356af001df9936/zendriver-0.15.3.tar.gz";
+    src = pkgs.fetchPypi {
+      inherit pname version;
       hash = "sha256-g8OP4XSJNw8MOB37iw1NC7n153VcV0jJnXK/mIb1nu4=";
     };
 
@@ -281,7 +283,6 @@ let
     py.puremagic
     py.py7zr
     py.pydantic
-    py.pymediainfo
     py."python-jose"
     py."python-multipart"
     py.requests
@@ -300,18 +301,17 @@ let
 in
 pkgs.stdenv.mkDerivation rec {
   pname = "konomitv";
-  version = "master-2026-04-03";
+  version = "master-2026-05-01";
 
   src = pkgs.fetchFromGitHub {
     owner = "tsukumijima";
     repo = "KonomiTV";
-    rev = "0474585040b9a765b25e4b2bba7c6f3f67b77f63";
-    hash = "sha256-VxJD9ZTRAiS6YKtH/XR7Ko0EwYarkxhTGl/fPp9JxeE=";
+    rev = "72dfc73542fb3995d2fb216facf98749c42b6114";
+    hash = "sha256-SqT+R83/Frhdq5WVicccKLqRm6ENsQ0gahAfKzNDJXY=";
   };
 
   patches = [
     ./konomitv-immutable-paths.patch
-    ./konomitv-immutable-logs-path.patch
   ];
 
   nativeBuildInputs = [ pkgs.makeWrapper ];
