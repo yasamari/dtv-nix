@@ -58,7 +58,7 @@ let
 in
 stdenv.mkDerivation rec {
   pname = "qsvenc";
-  version = "8.08";
+  version = "8.11";
 
   hardeningDisable = [ "all" ];
 
@@ -66,7 +66,7 @@ stdenv.mkDerivation rec {
     owner = "rigaya";
     repo = "QSVEnc";
     tag = version;
-    hash = "sha256-Oq+P+ZkJB9Wbit3yHW0pONJbIaBWCi8tvIA8ZZJm5rE=";
+    hash = "sha256-n53OjbiCtcaAGNajCxCYRf4JdqqVopW94HI7HnPFVdc=";
     fetchSubmodules = true;
   };
 
@@ -100,6 +100,12 @@ stdenv.mkDerivation rec {
   ];
 
   postPatch = ''
+    substituteInPlace configure \
+      --replace-fail 'rgy_filter_bwdif.cpp' 'rgy_filter_bwdif.cpp             rgy_filter_ivtc.cpp               rgy_filter_msmooth.cpp            rgy_filter_msharpen.cpp'
+
+    substituteInPlace configure \
+      --replace-fail 'rgy_filter_bwdif.cl' 'rgy_filter_bwdif.cl              rgy_filter_ivtc.cl                rgy_filter_msmooth.cl             rgy_filter_msharpen.cl'
+
     substituteInPlace QSVPipeline/rgy_opencl.cpp \
       --replace 'img_desc.mem_object' 'img_desc.buffer'
 
