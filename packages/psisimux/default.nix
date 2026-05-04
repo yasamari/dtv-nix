@@ -1,13 +1,13 @@
 { pkgs, ... }:
 pkgs.stdenv.mkDerivation rec {
   pname = "psisimux";
-  version = "master-250405";
+  version = "master-260422";
 
   src = pkgs.fetchFromGitHub {
     owner = "xtne6f";
     repo = "psisimux";
-    rev = "1a01a38886dc41bac81d547ba31fa9eef1bad46b";
-    hash = "sha256-omBkpFz8AXDqpNMa+8g3SdomUMVy8H/1PbEHJQTvbcI=";
+    rev = version;
+    hash = "sha256-A8GPEZNqUGZaQ4p+WhUQYjhEoHNfoXPkxBZ+C/I9dj0=";
   };
 
   strictDeps = true;
