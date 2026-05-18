@@ -60,13 +60,13 @@ let
 in
 pkgs.stdenv.mkDerivation rec {
   pname = "amatsukaze";
-  version = "1.0.6.4";
+  version = "1.0.7.1";
 
   src = pkgs.fetchFromGitHub {
     owner = "rigaya";
     repo = "Amatsukaze";
     tag = version;
-    hash = "sha256-nmobExV7gYT+x4+0F7REPd6v1o1JPcXltUuuo9JNb58=";
+    hash = "sha256-qfRxxH/KToaieLZnDbjqGy++IITXZloAxI3+bAvwVA0=";
     fetchSubmodules = true;
   };
 
@@ -169,6 +169,7 @@ pkgs.stdenv.mkDerivation rec {
 
     install -Dm755 build/AmatsukazeCLI/AmatsukazeCLI "$exeDir/AmatsukazeCLI"
     install -Dm755 build/Amatsukaze/libAmatsukaze.so "$exeDir/libAmatsukaze.so"
+    install -Dm755 build/AmatsukazeGenLogo/AmatsukazeGenLogo "$exeDir/AmatsukazeGenLogo"
 
     dotnetOutputDir=""
     for dir in x64/Release x64/Release/net* x64/Release/net*/linux-x64; do
@@ -229,21 +230,20 @@ pkgs.stdenv.mkDerivation rec {
       --prefix LD_LIBRARY_PATH : "${cudaDriverLibraryPath}" \
       --prefix PATH : "${runtimePath}"
 
+    makeWrapper "$exeDir/AmatsukazeGenLogo" "$out/bin/AmatsukazeGenLogo" \
+      --prefix LD_LIBRARY_PATH : "${cudaDriverLibraryPath}"
+
     makeWrapper "${dotnetRuntime}/bin/dotnet" "$out/bin/AmatsukazeServerCLI" \
       --set DOTNET_ROOT "${dotnetRuntime}/share/dotnet" \
-      --prefix LD_LIBRARY_PATH : "${cudaDriverLibraryPath}" \
       --prefix PATH : "$out/bin:${runtimePath}" \
       --add-flags "$exeDir/AmatsukazeServerCLI.dll"
 
     makeWrapper "${dotnetRuntime}/bin/dotnet" "$out/bin/AmatsukazeAddTask" \
       --set DOTNET_ROOT "${dotnetRuntime}/share/dotnet" \
-      --prefix LD_LIBRARY_PATH : "${cudaDriverLibraryPath}" \
-      --prefix PATH : "${runtimePath}" \
       --add-flags "$exeDir/AmatsukazeAddTask.dll"
 
     makeWrapper "${dotnetRuntime}/bin/dotnet" "$out/bin/ScriptCommand" \
       --set DOTNET_ROOT "${dotnetRuntime}/share/dotnet" \
-      --prefix LD_LIBRARY_PATH : "${cudaDriverLibraryPath}" \
       --prefix PATH : "${runtimePath}" \
       --add-flags "$exeDir/ScriptCommand.dll"
 
