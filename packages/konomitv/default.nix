@@ -301,13 +301,13 @@ let
 in
 pkgs.stdenv.mkDerivation rec {
   pname = "konomitv";
-  version = "master-2026-05-01";
+  version = "master-2026-05-11";
 
   src = pkgs.fetchFromGitHub {
     owner = "tsukumijima";
     repo = "KonomiTV";
-    rev = "72dfc73542fb3995d2fb216facf98749c42b6114";
-    hash = "sha256-SqT+R83/Frhdq5WVicccKLqRm6ENsQ0gahAfKzNDJXY=";
+    rev = "a4caed43b6e26eb493b38464d3f975556377865e";
+    hash = "sha256-O3Ht8c8AdUE+B766CBiDXqBigkcBLEeNQgsmIizczHw=";
   };
 
   patches = [
