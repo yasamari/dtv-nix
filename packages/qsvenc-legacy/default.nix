@@ -1,1 +1,4 @@
-{ pkgs, ... }: pkgs.callPackage ../_qsvenc/default.nix { useLegacyIntel = true; }
+{ perSystem, ... }:
+perSystem.self.qsvenc.override {
+  useLegacyIntel = true;
+}
