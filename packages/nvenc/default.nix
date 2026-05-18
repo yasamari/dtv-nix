@@ -4,7 +4,7 @@
 }:
 pkgs.stdenv.mkDerivation rec {
   pname = "nvenc";
-  version = "9.14";
+  version = "9.16";
 
   hardeningDisable = [ "all" ];
 
@@ -12,7 +12,7 @@ pkgs.stdenv.mkDerivation rec {
     owner = "rigaya";
     repo = "NVEnc";
     tag = version;
-    hash = "sha256-SK3RWlkHqmIQYWHkeqWTdH/oHPF/kultxWrQ/Yfe+wI=";
+    hash = "sha256-gXvkPPVa+sjK7CVhZi9N3E2n1N++U4YD3dHFgBAzzts=";
     fetchSubmodules = true;
   };
 
@@ -36,6 +36,11 @@ pkgs.stdenv.mkDerivation rec {
     cudaPackages.cuda_cudart
     cudaPackages.libnpp.static
   ];
+
+  postPatch = ''
+    substituteInPlace configure \
+      --replace-fail 'NVEncFilterYadif.cu \' 'NVEncFilterMsharpen.cu     NVEncFilterMsmooth.cu       NVEncFilterYadif.cu \'
+  '';
 
   configurePhase = ''
     runHook preConfigure
