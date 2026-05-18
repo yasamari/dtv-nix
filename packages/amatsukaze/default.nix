@@ -33,6 +33,7 @@ let
   b24tovtt = perSystem.self.b24tovtt;
   chapterExe = perSystem.self.chapter_exe;
   joinLogoScp = perSystem.self.join_logo_scp;
+  amatsukazeAddTask = perSystem.self.amatsukaze-add-task;
 
   runtimeTools = [
     ffmpeg
@@ -50,6 +51,7 @@ let
     b24tovtt
     chapterExe
     joinLogoScp
+    amatsukazeAddTask
     pkgs.fdk-aac-encoder
     pkgs.opusTools
     pkgs.whisper-cpp
@@ -115,7 +117,6 @@ pkgs.stdenv.mkDerivation rec {
     for project in \
       AmatsukazeServer/AmatsukazeServer.csproj \
       AmatsukazeServerCLI/AmatsukazeServerCLI.csproj \
-      AmatsukazeAddTask/AmatsukazeAddTask.csproj \
       ScriptCommand/ScriptCommand.csproj; do
       dotnet restore "$project" \
         --runtime linux-x64 \
@@ -134,7 +135,6 @@ pkgs.stdenv.mkDerivation rec {
     for project in \
       AmatsukazeServer/AmatsukazeServer.csproj \
       AmatsukazeServerCLI/AmatsukazeServerCLI.csproj \
-      AmatsukazeAddTask/AmatsukazeAddTask.csproj \
       ScriptCommand/ScriptCommand.csproj; do
       dotnet build "$project" \
         --configuration Release \
@@ -173,7 +173,7 @@ pkgs.stdenv.mkDerivation rec {
 
     dotnetOutputDir=""
     for dir in x64/Release x64/Release/net* x64/Release/net*/linux-x64; do
-      if [ -f "$dir/AmatsukazeServerCLI.dll" ] && [ -f "$dir/AmatsukazeAddTask.dll" ] && [ -f "$dir/ScriptCommand.dll" ]; then
+      if [ -f "$dir/AmatsukazeServerCLI.dll" ] && [ -f "$dir/ScriptCommand.dll" ]; then
         dotnetOutputDir="$dir"
         break
       fi
@@ -237,10 +237,6 @@ pkgs.stdenv.mkDerivation rec {
       --set DOTNET_ROOT "${dotnetRuntime}/share/dotnet" \
       --prefix PATH : "$out/bin:${runtimePath}" \
       --add-flags "$exeDir/AmatsukazeServerCLI.dll"
-
-    makeWrapper "${dotnetRuntime}/bin/dotnet" "$out/bin/AmatsukazeAddTask" \
-      --set DOTNET_ROOT "${dotnetRuntime}/share/dotnet" \
-      --add-flags "$exeDir/AmatsukazeAddTask.dll"
 
     makeWrapper "${dotnetRuntime}/bin/dotnet" "$out/bin/ScriptCommand" \
       --set DOTNET_ROOT "${dotnetRuntime}/share/dotnet" \
