@@ -53,7 +53,7 @@ let
     joinLogoScp
     amatsukazeAddTask
     pkgs.fdk-aac-encoder
-    pkgs.opusTools
+    pkgs.opus-tools
     pkgs.whisper-cpp
   ];
 
