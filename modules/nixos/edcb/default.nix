@@ -92,9 +92,8 @@ let
       install -m 0644 "${cfg.package}/share/edcb/ini/ContentTypeText.txt" "${stateDir}/ContentTypeText.txt"
     fi
 
-    if [ ! -e "$httpPublicDir" ]; then
-      ln -s "$packageHttpPublicDir" "$httpPublicDir"
-    fi
+    rm -rf "$httpPublicDir"
+    ln -sfn "$packageHttpPublicDir" "$httpPublicDir"
 
     if [ ! -e "$settingDir/HttpPublic.ini" ]; then
       install -m 0644 "$packageSettingDir/HttpPublic.ini" "$settingDir/HttpPublic.ini"
