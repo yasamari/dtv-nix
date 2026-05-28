@@ -165,6 +165,7 @@ py.buildPythonApplication rec {
   postInstall = ''
     install -Dm644 ../config.example.yaml "$out/share/konomitv/config.example.yaml"
     install -Dm644 ../License.txt "$out/share/konomitv/License.txt"
+    install -Dm644 ${./config.yaml} "$out/share/konomitv/config.yaml"
 
     install -Dm644 KonomiTV.py "$out/${python.sitePackages}/KonomiTV.py"
   '';
