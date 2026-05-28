@@ -239,45 +239,49 @@ let
     };
   };
 in
-python.withPackages (_: [
-  aerich
-  ariblib
-  biim
-  hashids
-  tortoiseOrm
-  zendriver
-  py.aiofiles
-  py.aiohttp
-  py.av
-  py.bcrypt
-  py.beautifulsoup4
-  py.colorama
-  py.cryptography
-  py.elevate
-  py.fastapi
-  py.h2
-  py.httpx
-  py.httptools
-  py."opencv-python-headless"
-  py.passlib
-  py.pillow
-  py.ping3
-  py.psutil
-  py.puremagic
-  py.py7zr
-  py.pydantic
-  py."python-jose"
-  py."python-multipart"
-  py.requests
-  py.rich
-  py."ruamel-yaml"
-  py."sse-starlette"
-  py.typer
-  py."typing-extensions"
-  py."typing-inspect"
-  py.tzdata
-  py.uvicorn
-  py.uvloop
-  py.watchfiles
-  py.websockets
-])
+{
+  inherit python;
+
+  dependencies = [
+    aerich
+    ariblib
+    biim
+    hashids
+    tortoiseOrm
+    zendriver
+    py.aiofiles
+    py.aiohttp
+    py.av
+    py.bcrypt
+    py.beautifulsoup4
+    py.colorama
+    py.cryptography
+    py.elevate
+    py.fastapi
+    py.h2
+    py.httpx
+    py.httptools
+    py."opencv-python-headless"
+    py.passlib
+    py.pillow
+    py.ping3
+    py.psutil
+    py.puremagic
+    py.py7zr
+    py.pydantic
+    py."python-jose"
+    py."python-multipart"
+    py.requests
+    py.rich
+    py."ruamel-yaml"
+    py."sse-starlette"
+    py.typer
+    py."typing-extensions"
+    py."typing-inspect"
+    py.tzdata
+    py.uvicorn
+    py.uvloop
+    py.watchfiles
+    py.websockets
+  ];
+}
