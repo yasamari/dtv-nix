@@ -8,6 +8,62 @@ let
   lib = pkgs.lib;
   python = pkgs.python313;
   py = python.pkgs;
+  nodejs = pkgs.nodejs_20;
+  yarn = pkgs.yarn.override { inherit nodejs; };
+
+  konomitvSrc = pkgs.fetchFromGitHub {
+    owner = "tsukumijima";
+    repo = "KonomiTV";
+    rev = "a4caed43b6e26eb493b38464d3f975556377865e";
+    hash = "sha256-O3Ht8c8AdUE+B766CBiDXqBigkcBLEeNQgsmIizczHw=";
+  };
+
+  clientBundle = pkgs.stdenv.mkDerivation rec {
+    pname = "konomitv-client";
+    version = "master-2026-05-11";
+
+    src = konomitvSrc;
+    sourceRoot = "source/client";
+
+    strictDeps = true;
+
+    patches = [
+      # Fix: [Client][Videos] タブレット縦画面で録画番組一覧・マイリスト・視聴履歴ページがはみ出る表示崩れの問題を修正
+      (pkgs.fetchpatch {
+        url = "https://github.com/tsukumijima/KonomiTV/commit/a4de2c4e2370ffe8ca3ca7781827670e45ceb2b3.patch";
+        hash = "sha256-TyJMlXU6zDZmUQ1GSXre2USr+SPWsLWIyESAiMogBxg=";
+      })
+    ];
+    patchFlags = [ "-p2" ];
+
+    nativeBuildInputs = [
+      nodejs
+      yarn
+      pkgs.yarnConfigHook
+      pkgs.yarnBuildHook
+    ];
+
+    yarnOfflineCache = pkgs.fetchYarnDeps {
+      yarnLock = konomitvSrc + "/client/yarn.lock";
+      hash = "sha256-XlZJaE8UbKnzMHBVF689niKVnMK51fdFJlEr/1oaeV0=";
+    };
+
+    installPhase = ''
+      runHook preInstall
+
+      mkdir -p "$out"
+      cp -a dist/. "$out/"
+
+      runHook postInstall
+    '';
+
+    meta = with lib; {
+      description = "KonomiTV client bundle";
+      homepage = "https://github.com/tsukumijima/KonomiTV";
+      license = licenses.mit;
+      platforms = platforms.linux;
+    };
+  };
 
   akebi = perSystem.self.akebi;
   psisimux = perSystem.self.psisimux;
@@ -303,12 +359,7 @@ pkgs.stdenv.mkDerivation rec {
   pname = "konomitv";
   version = "master-2026-05-11";
 
-  src = pkgs.fetchFromGitHub {
-    owner = "tsukumijima";
-    repo = "KonomiTV";
-    rev = "a4caed43b6e26eb493b38464d3f975556377865e";
-    hash = "sha256-O3Ht8c8AdUE+B766CBiDXqBigkcBLEeNQgsmIizczHw=";
-  };
+  src = konomitvSrc;
 
   patches = [
     ./konomitv-immutable-paths.patch
@@ -334,6 +385,9 @@ pkgs.stdenv.mkDerivation rec {
     mkdir -p "$out/bin" "$shareDir"
     cp -a server "$shareDir/server"
     cp -a client "$shareDir/client"
+    rm -rf "$shareDir/client/dist"
+    mkdir -p "$shareDir/client/dist"
+    cp -a "${clientBundle}/." "$shareDir/client/dist/"
     install -Dm644 config.example.yaml "$shareDir/config.example.yaml"
     install -Dm644 config.example.yaml "$shareDir/config.yaml"
     install -Dm644 License.txt "$shareDir/License.txt"
