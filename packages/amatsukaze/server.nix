@@ -1,16 +1,9 @@
-{
-  pkgs,
-  perSystem,
-  ...
-}:
-let
-  common = import ../amatsukaze/common.nix { inherit pkgs perSystem; };
-in
+{ pkgs, common }:
 pkgs.buildDotnetModule {
-  pname = "amatsukaze-add-task";
+  pname = "amatsukaze-server";
   inherit (common) version src;
 
-  projectFile = "AmatsukazeAddTask/AmatsukazeAddTask.csproj";
+  projectFile = "AmatsukazeServer/AmatsukazeServer.csproj";
   nugetDeps = common.dotnetNugetDeps;
 
   dotnet-sdk = common.dotnetSdk;
@@ -18,7 +11,10 @@ pkgs.buildDotnetModule {
 
   selfContainedBuild = false;
 
-  postPatch = common.dotnetVersionPatch;
+  postPatch = common.dotnetVersionPatch + ''
+    substituteInPlace AmatsukazeServer/Server/EncodeServer.cs \
+      --replace-fail 'setting.AmatsukazePath = Path.Combine(basePath, "AmatsukazeCLI" + exeDefaultAppendix);' 'setting.AmatsukazePath = "AmatsukazeCLI";'
+  '';
 
   dotnetBuildFlags = [
     "-p:ContinuousIntegrationBuild=true"
@@ -26,10 +22,9 @@ pkgs.buildDotnetModule {
   ];
 
   meta = with pkgs.lib; {
-    description = "Task addition utility for Amatsukaze";
+    description = "Amatsukaze .NET server library and WebUI";
     homepage = "https://github.com/rigaya/Amatsukaze";
     license = licenses.mit;
-    mainProgram = "AmatsukazeAddTask";
     platforms = [ "x86_64-linux" ];
   };
 }

@@ -1,16 +1,9 @@
-{
-  pkgs,
-  perSystem,
-  ...
-}:
-let
-  common = import ../amatsukaze/common.nix { inherit pkgs perSystem; };
-in
+{ pkgs, common }:
 pkgs.buildDotnetModule {
-  pname = "amatsukaze-add-task";
+  pname = "amatsukaze-script-command";
   inherit (common) version src;
 
-  projectFile = "AmatsukazeAddTask/AmatsukazeAddTask.csproj";
+  projectFile = "ScriptCommand/ScriptCommand.csproj";
   nugetDeps = common.dotnetNugetDeps;
 
   dotnet-sdk = common.dotnetSdk;
@@ -26,10 +19,10 @@ pkgs.buildDotnetModule {
   ];
 
   meta = with pkgs.lib; {
-    description = "Task addition utility for Amatsukaze";
+    description = "Amatsukaze script command utility";
     homepage = "https://github.com/rigaya/Amatsukaze";
     license = licenses.mit;
-    mainProgram = "AmatsukazeAddTask";
+    mainProgram = "ScriptCommand";
     platforms = [ "x86_64-linux" ];
   };
 }

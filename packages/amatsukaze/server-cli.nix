@@ -1,16 +1,9 @@
-{
-  pkgs,
-  perSystem,
-  ...
-}:
-let
-  common = import ../amatsukaze/common.nix { inherit pkgs perSystem; };
-in
+{ pkgs, common }:
 pkgs.buildDotnetModule {
-  pname = "amatsukaze-add-task";
+  pname = "amatsukaze-server-cli";
   inherit (common) version src;
 
-  projectFile = "AmatsukazeAddTask/AmatsukazeAddTask.csproj";
+  projectFile = "AmatsukazeServerCLI/AmatsukazeServerCLI.csproj";
   nugetDeps = common.dotnetNugetDeps;
 
   dotnet-sdk = common.dotnetSdk;
@@ -26,10 +19,9 @@ pkgs.buildDotnetModule {
   ];
 
   meta = with pkgs.lib; {
-    description = "Task addition utility for Amatsukaze";
+    description = "Amatsukaze server CLI";
     homepage = "https://github.com/rigaya/Amatsukaze";
     license = licenses.mit;
-    mainProgram = "AmatsukazeAddTask";
     platforms = [ "x86_64-linux" ];
   };
 }
