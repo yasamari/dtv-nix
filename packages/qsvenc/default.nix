@@ -33,7 +33,7 @@ let
 in
 pkgs.stdenv.mkDerivation rec {
   pname = "qsvenc";
-  version = "8.12";
+  version = "8.13";
 
   hardeningDisable = [ "all" ];
 
@@ -41,19 +41,19 @@ pkgs.stdenv.mkDerivation rec {
     owner = "rigaya";
     repo = "QSVEnc";
     tag = version;
-    hash = "sha256-scpWrCN15HlDwwggZo2+TIuTwcPkpYvIYTqVpVxyDZE=";
+    hash = "sha256-082CmeTtIxsjJxIspNvGqJcuS/LSCS57sVclJOWg0Ao=";
     fetchSubmodules = true;
   };
 
-  patches = [ ./use-system-libvpl.patch ];
-
   nativeBuildInputs = with pkgs; [
+    cargo
     cmake
+    git
+    makeWrapper
+    meson
     pkg-config
     cargo-c
-    git
-    wget
-    makeWrapper
+    ninja
   ];
 
   buildInputs = with pkgs; [
@@ -65,8 +65,8 @@ pkgs.stdenv.mkDerivation rec {
     libvpl
     opencl-headers
     ocl-icd
+    libx11
     libdovi
-    cargo
     hdr10plus
 
     # intel
@@ -77,32 +77,21 @@ pkgs.stdenv.mkDerivation rec {
   ];
 
   postPatch = ''
-    substituteInPlace configure \
-      --replace-fail 'rgy_filter_bwdif.cpp' 'rgy_filter_bwdif.cpp             rgy_filter_ivtc.cpp               rgy_filter_msmooth.cpp            rgy_filter_msharpen.cpp'
-
-    substituteInPlace configure \
-      --replace-fail 'rgy_filter_bwdif.cl' 'rgy_filter_bwdif.cl              rgy_filter_ivtc.cl                rgy_filter_msmooth.cl             rgy_filter_msharpen.cl'
-
-    substituteInPlace configure \
-      --replace-fail '--exists hdr10plus ; then' '--exists hdr10plus-rs ; then'
-
-    patchShebangs build_libhdr10plus.sh build_libdovi.sh build_vpl.sh
-
-    substituteInPlace configure \
-      --replace-fail 'LIBVPL_LIBS=""' \
-        'LIBVPL_LIBS="-L${pkgs.libvpl}/lib -lvpl -ldl"' \
-      --replace-fail 'LIBVPL_CFLAGS="-I./libvpl/api/vpl"' \
-        'LIBVPL_CFLAGS="-I${pkgs.libvpl}/include/vpl"'
+    substituteInPlace meson.build \
+      --replace-fail \
+        "version: run_command('git', 'describe', '--tags', '--abbrev=0', check: true).stdout().strip()," \
+        "version: '${version}',"
   '';
 
   configurePhase = ''
     runHook preConfigure
 
-    patchShebangs ./configure
-
-    export LD="$CXX"
-
-    ./configure
+    meson setup build \
+      --buildtype release \
+      --prefix "$out" \
+      -Dopencl_headers=${pkgs.opencl-headers}/include \
+      -Denable_avisynth=false \
+      -Denable_vapoursynth=false
 
     runHook postConfigure
   '';
@@ -110,7 +99,7 @@ pkgs.stdenv.mkDerivation rec {
   buildPhase = ''
     runHook preBuild
 
-    make
+    meson compile -C build
 
     runHook postBuild
   '';
@@ -118,8 +107,7 @@ pkgs.stdenv.mkDerivation rec {
   installPhase = ''
     runHook preInstall
 
-    mkdir -p $out/bin
-    cp -v qsvencc $out/bin/
+    meson install -C build
 
     wrapProgram $out/bin/qsvencc \
       --prefix LD_LIBRARY_PATH : "${
