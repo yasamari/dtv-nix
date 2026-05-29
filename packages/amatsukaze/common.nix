@@ -80,6 +80,9 @@ let
     substituteInPlace AmatsukazeServer/Version.sh \
       --replace-fail '/bin/bash' '${pkgs.bash}/bin/bash' \
       --replace-fail 'VER=$(git describe --tags)' 'VER="${version}"'
+    substituteInPlace AmatsukazeServer/Properties/AssemblyInfo.tt \
+      --replace-fail 'AssemblyVersion("0.0.0.0")' 'AssemblyVersion("@SHORTVERSION@")'
+    (cd AmatsukazeServer && ./Version.sh)
   '';
 in
 {
