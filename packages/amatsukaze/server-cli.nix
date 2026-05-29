@@ -9,7 +9,9 @@ pkgs.buildDotnetModule {
   dotnet-sdk = common.dotnetSdk;
   dotnet-runtime = common.dotnetRuntime;
 
-  selfContainedBuild = false;
+  selfContainedBuild = true;
+
+  dotnetInstallFlags = [ "-p:PublishSingleFile=true" ];
 
   postPatch = common.dotnetVersionPatch;
 

@@ -25,6 +25,7 @@ pkgs.stdenv.mkDerivation {
 
   dontConfigure = true;
   dontBuild = true;
+  dontStrip = true;
 
   installPhase = ''
     exeDir="$out/lib/amatsukaze/exe_files"
@@ -37,29 +38,13 @@ pkgs.stdenv.mkDerivation {
     cp -a ${native}/bin/AmatsukazeCLI "$exeDir/"
     cp -a ${native}/bin/AmatsukazeGenLogo "$exeDir/"
 
-    # .NET DLLs — each buildDotnetModule output is under $out/lib/<pname>/
-    # First copy the server as base (most complete, includes shared deps + wwwroot)
-    cp -a ${server}/lib/amatsukaze-server/. "$exeDir/"
-    # Then pull in project-specific DLLs from the other components
-    chmod -R u+w "$exeDir/"
-    for dll in \
-      AmatsukazeServerCLI.dll AmatsukazeServerCLI.runtimeconfig.json AmatsukazeServerCLI.deps.json \
-      AmatsukazeServerCLI.pdb; do
-      src="${server-cli}/lib/amatsukaze-server-cli/$dll"
-      [ -f "$src" ] && cp -a "$src" "$exeDir/"
-    done
-    for dll in \
-      ScriptCommand.dll ScriptCommand.runtimeconfig.json ScriptCommand.deps.json \
-      ScriptCommand.pdb; do
-      src="${script-command}/lib/amatsukaze-script-command/$dll"
-      [ -f "$src" ] && cp -a "$src" "$exeDir/"
-    done
-    for dll in \
-      AmatsukazeAddTask.dll AmatsukazeAddTask.runtimeconfig.json AmatsukazeAddTask.deps.json \
-      AmatsukazeAddTask.pdb; do
-      src="${add-task}/lib/amatsukaze-add-task/$dll"
-      [ -f "$src" ] && cp -a "$src" "$exeDir/"
-    done
+    # Self-contained .NET binaries (PublishSingleFile=true)
+    cp -a ${server-cli}/lib/amatsukaze-server-cli/AmatsukazeServerCLI "$exeDir/"
+    cp -a ${script-command}/lib/amatsukaze-script-command/ScriptCommand "$exeDir/"
+    cp -a ${add-task}/lib/amatsukaze-add-task/AmatsukazeAddTask "$exeDir/"
+
+    # WebUI static files (extracted from AmatsukazeServer.dll publish)
+    cp -a ${server}/lib/amatsukaze-server/wwwroot "$exeDir/wwwroot"
 
     # Defaults, scripts, JL
     cp -a defaults/. "$shareDir/"
@@ -98,15 +83,12 @@ pkgs.stdenv.mkDerivation {
     makeWrapper "$exeDir/AmatsukazeGenLogo" "$out/bin/AmatsukazeGenLogo" \
       --prefix LD_LIBRARY_PATH : "${cudaDriverLibraryPath}"
 
-    makeWrapper "${common.dotnetRuntime}/bin/dotnet" "$out/bin/AmatsukazeServerCLI" \
-      --set DOTNET_ROOT "${common.dotnetRuntime}/share/dotnet" \
-      --prefix PATH : "$out/bin:${runtimePath}" \
-      --add-flags "$exeDir/AmatsukazeServerCLI.dll"
+    makeWrapper "$exeDir/AmatsukazeServerCLI" "$out/bin/AmatsukazeServerCLI" \
+      --prefix LD_LIBRARY_PATH : "${cudaDriverLibraryPath}" \
+      --prefix PATH : "$out/bin:${runtimePath}"
 
-    makeWrapper "${common.dotnetRuntime}/bin/dotnet" "$out/bin/ScriptCommand" \
-      --set DOTNET_ROOT "${common.dotnetRuntime}/share/dotnet" \
-      --prefix PATH : "${runtimePath}" \
-      --add-flags "$exeDir/ScriptCommand.dll"
+    ln -s "$exeDir/ScriptCommand" "$out/bin/ScriptCommand"
+    ln -s "$exeDir/AmatsukazeAddTask" "$out/bin/AmatsukazeAddTask"
 
     ln -s "$exeDir/libAmatsukaze.so" "$out/lib/libAmatsukaze.so"
   '';

@@ -11,6 +11,8 @@ pkgs.buildDotnetModule {
 
   selfContainedBuild = false;
 
+  dontDotnetFixup = true;
+
   postPatch = common.dotnetVersionPatch + ''
     substituteInPlace AmatsukazeServer/Server/EncodeServer.cs \
       --replace-fail 'setting.AmatsukazePath = Path.Combine(basePath, "AmatsukazeCLI" + exeDefaultAppendix);' 'setting.AmatsukazePath = "AmatsukazeCLI";'
