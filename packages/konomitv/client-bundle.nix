@@ -4,7 +4,7 @@
   version,
 }:
 let
-  nodejs = pkgs.nodejs_20;
+  nodejs = pkgs.nodejs_22;
   yarn = pkgs.yarn.override { inherit nodejs; };
 in
 pkgs.stdenv.mkDerivation rec {
@@ -16,14 +16,16 @@ pkgs.stdenv.mkDerivation rec {
 
   strictDeps = true;
 
-
-
   nativeBuildInputs = [
     nodejs
     yarn
     pkgs.yarnConfigHook
     pkgs.yarnBuildHook
   ];
+
+  postPatch = ''
+    substituteInPlace package.json --replace-fail '"node": "^20.16.0"' '"node": "^22.0.0"'
+  '';
 
   yarnOfflineCache = pkgs.fetchYarnDeps {
     yarnLock = konomitvSrc + "/client/yarn.lock";
