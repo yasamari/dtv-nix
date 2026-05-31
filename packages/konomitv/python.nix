@@ -251,6 +251,7 @@ in
     zendriver
     py.aiofiles
     py.aiohttp
+    py.atproto
     py.av
     py.bcrypt
     py.beautifulsoup4

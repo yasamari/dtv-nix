@@ -6,15 +6,15 @@
 }:
 let
   lib = pkgs.lib;
-  version = "master-2026-05-11";
+  version = "master-2026-05-31";
   python = pkgs.python313;
   py = python.pkgs;
 
   konomitvSrc = pkgs.fetchFromGitHub {
     owner = "tsukumijima";
     repo = "KonomiTV";
-    rev = "a4caed43b6e26eb493b38464d3f975556377865e";
-    hash = "sha256-O3Ht8c8AdUE+B766CBiDXqBigkcBLEeNQgsmIizczHw=";
+    rev = "704005a935186912d9af69ff85c69fc3ac1afcd6";
+    hash = "sha256-oNVxbYYTJ12VzpwEs2Zk0RgR+KbzSZ1pT2bprlYdMvI=";
   };
 
   clientBundle = import ./client-bundle.nix {
@@ -50,6 +50,7 @@ py.buildPythonApplication rec {
 
   pythonRelaxDeps = [
     "aiofiles"
+    "atproto"
     "av"
     "bcrypt"
     "fastapi"
