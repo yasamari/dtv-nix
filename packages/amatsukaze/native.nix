@@ -1,10 +1,13 @@
-{ pkgs, common }:
+{
+  pkgs,
+  common,
+  ffmpeg,
+  avisynthplusCuda,
+}:
 let
   inherit (common)
     version
     src
-    ffmpeg
-    avisynthplusCuda
     mesonVersionPatch
     ;
 in

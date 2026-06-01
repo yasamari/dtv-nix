@@ -5,67 +5,134 @@
   ...
 }:
 let
-  common = import ./common.nix { inherit pkgs perSystem useLegacyQsvenc; };
+  common = import ./common.nix { inherit pkgs perSystem; };
+  ffmpeg = pkgs.ffmpeg_6;
+  avisynthplusCuda = perSystem.self.avisynthplus-cuda;
+  native = import ./native.nix {
+    inherit
+      pkgs
+      common
+      ffmpeg
+      avisynthplusCuda
+      ;
+  };
 
-  native = import ./native.nix { inherit pkgs common; };
-  server = import ./server.nix { inherit pkgs common; };
-  server-cli = import ./server-cli.nix { inherit pkgs common; };
-  script-command = import ./script-command.nix { inherit pkgs common; };
-  add-task = perSystem.self.amatsukaze-add-task;
+  inherit (common)
+    version
+    src
+    dotnetSdk
+    dotnetRuntime
+    dotnetVersionPatch
+    ;
 
-  inherit (common) runtimePath cudaDriverLibraryPath;
+  avisynthcudafilters = perSystem.self.avisynthcudafilters;
+  nnedi3 = perSystem.self.nnedi3;
+  masktools = perSystem.self.masktools;
+  mvtools = perSystem.self.mvtools;
+  rgtools = perSystem.self.rgtools;
+  yadifmod2 = perSystem.self.yadifmod2;
+  tivtc = perSystem.self.tivtc;
+
+  qsvenc = if useLegacyQsvenc then perSystem.self."qsvenc-legacy" else perSystem.self.qsvenc;
+  nvenc = perSystem.self.nvenc;
+  tsreplace = perSystem.self.tsreplace;
+  tsreadex = perSystem.self.tsreadex;
+  psisiarc = perSystem.self.psisiarc;
+  b24tovtt = perSystem.self.b24tovtt;
+  chapterExe = perSystem.self.chapter_exe;
+  joinLogoScp = perSystem.self.join_logo_scp;
+  amatsukazeAddTask = perSystem.self.amatsukaze-add-task;
+
+  runtimeTools = [
+    pkgs.ffmpeg_6
+    pkgs.x264
+    pkgs.x265
+    pkgs.svt-av1
+    qsvenc
+    nvenc
+    pkgs.gpac
+    pkgs.mkvtoolnix
+    pkgs."l-smash"
+    tsreplace
+    tsreadex
+    psisiarc
+    b24tovtt
+    chapterExe
+    joinLogoScp
+    amatsukazeAddTask
+    pkgs.fdk-aac-encoder
+    pkgs.opus-tools
+    pkgs.whisper-cpp
+  ];
+
+  runtimePath = pkgs.lib.makeBinPath ([ dotnetRuntime ] ++ runtimeTools);
+  cudaDriverLibraryPath = "/run/opengl-driver/lib:/run/opengl-driver-32/lib";
 in
-pkgs.stdenv.mkDerivation {
+pkgs.buildDotnetModule {
   pname = "amatsukaze";
-  inherit (common) version;
+  inherit version src;
 
-  inherit (common) src;
+  projectFile = [
+    "AmatsukazeServer/AmatsukazeServer.csproj"
+    "AmatsukazeServerCLI/AmatsukazeServerCLI.csproj"
+    "ScriptCommand/ScriptCommand.csproj"
+    "AmatsukazeAddTask/AmatsukazeAddTask.csproj"
+  ];
+  nugetDeps = ./deps.json;
 
-  nativeBuildInputs = [ pkgs.makeWrapper ];
+  dotnet-sdk = dotnetSdk;
+  dotnet-runtime = dotnetRuntime;
 
-  dontConfigure = true;
-  dontBuild = true;
-  dontStrip = true;
+  enableParallelBuilding = false;
 
-  installPhase = ''
+  selfContainedBuild = false;
+
+  dontDotnetFixup = true;
+
+  postPatch = dotnetVersionPatch + ''
+    substituteInPlace AmatsukazeServer/Server/EncodeServer.cs \
+      --replace-fail 'setting.AmatsukazePath = Path.Combine(basePath, "AmatsukazeCLI" + exeDefaultAppendix);' 'setting.AmatsukazePath = "AmatsukazeCLI";'
+  '';
+
+  dotnetBuildFlags = [
+    "-p:ContinuousIntegrationBuild=true"
+    "-p:Deterministic=true"
+  ];
+
+  postInstall = ''
     exeDir="$out/lib/amatsukaze/exe_files"
     shareDir="$out/share/amatsukaze"
 
-    mkdir -p "$out/bin" "$out/lib/amatsukaze" "$exeDir" "$shareDir"
+    mkdir -p "$out/bin" "$exeDir" "$shareDir"
 
-    # Native binaries (libAmatsukaze.so, AmatsukazeCLI, AmatsukazeGenLogo)
+    shopt -s dotglob
+    for f in "$out/lib/amatsukaze"/*; do
+      [[ "$f" != "$exeDir" ]] && mv "$f" "$exeDir/"
+    done
+    shopt -u dotglob
+
     cp -a ${native}/lib/libAmatsukaze.so "$exeDir/"
     cp -a ${native}/bin/AmatsukazeCLI "$exeDir/"
     cp -a ${native}/bin/AmatsukazeGenLogo "$exeDir/"
 
-    # Self-contained .NET binaries (PublishSingleFile=true)
-    cp -a ${server-cli}/lib/amatsukaze-server-cli/AmatsukazeServerCLI "$exeDir/"
-    cp -a ${script-command}/lib/amatsukaze-script-command/ScriptCommand "$exeDir/"
-    cp -a ${add-task}/lib/amatsukaze-add-task/AmatsukazeAddTask "$exeDir/"
-
-    # WebUI static files (extracted from AmatsukazeServer.dll publish)
-    cp -a ${server}/lib/amatsukaze-server/wwwroot "$exeDir/wwwroot"
-
-    # Defaults, scripts, JL
     cp -a defaults/. "$shareDir/"
     mkdir -p "$shareDir/scripts"
     cp -a scripts/. "$shareDir/scripts/"
-    cp -a "${common.joinLogoScp}/share/join_logo_scp/JL" "$shareDir/JL"
+    cp -a "${joinLogoScp}/share/join_logo_scp/JL" "$shareDir/JL"
 
-    # Plugins
     mkdir -p "$exeDir/plugins64"
     cp -a defaults/exe_files/plugins64/. "$exeDir/plugins64/"
 
     shopt -s nullglob
     for pluginPath in \
-      "${common.avisynthplusCuda}/lib/avisynth" \
-      "${common.avisynthcudafilters}/lib/avisynth" \
-      "${common.nnedi3}/lib/avisynth" \
-      "${common.masktools}/lib/avisynth" \
-      "${common.mvtools}/lib/avisynth" \
-      "${common.rgtools}/lib/avisynth" \
-      "${common.yadifmod2}/lib/avisynth" \
-      "${common.tivtc}/lib/avisynth"; do
+      "${avisynthplusCuda}/lib/avisynth" \
+      "${avisynthcudafilters}/lib/avisynth" \
+      "${nnedi3}/lib/avisynth" \
+      "${masktools}/lib/avisynth" \
+      "${mvtools}/lib/avisynth" \
+      "${rgtools}/lib/avisynth" \
+      "${yadifmod2}/lib/avisynth" \
+      "${tivtc}/lib/avisynth"; do
       if [ -d "$pluginPath" ]; then
         for plugin in "$pluginPath"/*.so*; do
           ln -sf "$plugin" "$exeDir/plugins64/"
@@ -73,7 +140,7 @@ pkgs.stdenv.mkDerivation {
       fi
     done
 
-    ln -sf "${common.masktools}/lib/avisynth/libmasktools2.so" "$exeDir/plugins64/mt_masktools.so"
+    ln -sf "${masktools}/lib/avisynth/libmasktools2.so" "$exeDir/plugins64/mt_masktools.so"
 
     # Wrappers
     makeWrapper "$exeDir/AmatsukazeCLI" "$out/bin/AmatsukazeCLI" \
@@ -96,7 +163,7 @@ pkgs.stdenv.mkDerivation {
   meta = with pkgs.lib; {
     description = "Linux build of Amatsukaze server and CLI tools";
     homepage = "https://github.com/rigaya/Amatsukaze";
-    changelog = "https://github.com/rigaya/Amatsukaze/releases/tag/${common.version}";
+    changelog = "https://github.com/rigaya/Amatsukaze/releases/tag/${version}";
     license = licenses.mit;
     mainProgram = "AmatsukazeServerCLI";
     platforms = [ "x86_64-linux" ];

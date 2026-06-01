@@ -11,7 +11,7 @@ pkgs.buildDotnetModule {
   inherit (common) version src;
 
   projectFile = "AmatsukazeAddTask/AmatsukazeAddTask.csproj";
-  nugetDeps = common.dotnetNugetDeps;
+  nugetDeps = ./deps.json;
 
   dotnet-sdk = common.dotnetSdk;
   dotnet-runtime = common.dotnetRuntime;
@@ -32,6 +32,6 @@ pkgs.buildDotnetModule {
     homepage = "https://github.com/rigaya/Amatsukaze";
     license = licenses.mit;
     mainProgram = "AmatsukazeAddTask";
-    platforms = [ "x86_64-linux" ];
+    platforms = platforms.linux;
   };
 }
