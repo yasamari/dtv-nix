@@ -152,10 +152,14 @@ pkgs.buildDotnetModule {
 
     makeWrapper "$exeDir/AmatsukazeServerCLI" "$out/bin/AmatsukazeServerCLI" \
       --prefix LD_LIBRARY_PATH : "${cudaDriverLibraryPath}" \
-      --prefix PATH : "$out/bin:${runtimePath}"
+      --prefix PATH : "$out/bin:${runtimePath}" \
+      --set DOTNET_ROOT "${dotnetRuntime}"
 
-    ln -s "$exeDir/ScriptCommand" "$out/bin/ScriptCommand"
-    ln -s "$exeDir/AmatsukazeAddTask" "$out/bin/AmatsukazeAddTask"
+    makeWrapper "$exeDir/ScriptCommand" "$out/bin/ScriptCommand" \
+      --set DOTNET_ROOT "${dotnetRuntime}"
+
+    makeWrapper "$exeDir/AmatsukazeAddTask" "$out/bin/AmatsukazeAddTask" \
+      --set DOTNET_ROOT "${dotnetRuntime}"
 
     ln -s "$exeDir/libAmatsukaze.so" "$out/lib/libAmatsukaze.so"
   '';
