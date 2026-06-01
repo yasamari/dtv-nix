@@ -151,13 +151,13 @@
   },
   {
     "pname": "Microsoft.NET.Sdk.WebAssembly.Pack",
-    "version": "10.0.7",
-    "hash": "sha256-oC4g9q/ZCZx7yt6B4AtlKrHiaumV0lnSdirOoswPsFc="
+    "version": "10.0.8",
+    "hash": "sha256-c6eCATnJUqnIwiGX2DqHVA8a841K5BHD7JehkIuHzSM="
   },
   {
     "pname": "Microsoft.NETCore.App.Runtime.Mono.browser-wasm",
-    "version": "10.0.7",
-    "hash": "sha256-uF8N0AsM+46wavjAYbUnvFZrtTtjBcCKOzpLxlQJw3Y="
+    "version": "10.0.8",
+    "hash": "sha256-JIr8wsgLQVBqXjJlOc43cd3iO21s7u+qZQK391JnfZk="
   },
   {
     "pname": "SixLabors.ImageSharp",
