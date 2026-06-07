@@ -3,13 +3,13 @@
   perSystem,
 }:
 let
-  version = "1.0.7.3";
+  version = "1.0.8.0";
 
   src = pkgs.fetchFromGitHub {
     owner = "rigaya";
     repo = "Amatsukaze";
     tag = version;
-    hash = "sha256-F/UBqqMvCRd3ueqtrLLCnwq5uhiPaw+kNBJUFlLSO8E=";
+    hash = "sha256-+/Y3YzYfekqEtR/wTUNWuGlfU0D6D3W+/VivhyqkBkA=";
     fetchSubmodules = true;
   };
 

@@ -63,6 +63,7 @@ let
     pkgs.fdk-aac-encoder
     pkgs.opus-tools
     pkgs.whisper-cpp
+    pkgs.python3
   ];
 
   runtimePath = pkgs.lib.makeBinPath ([ dotnetRuntime ] ++ runtimeTools);
