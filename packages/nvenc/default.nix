@@ -39,7 +39,9 @@ pkgs.stdenv.mkDerivation rec {
 
   postPatch = ''
     substituteInPlace configure \
-      --replace-fail 'NVEncFilterYadif.cu \' 'NVEncFilterMsharpen.cu     NVEncFilterMsmooth.cu       NVEncFilterYadif.cu \'
+      --replace-fail "NVEncFilterYadif.cu \\" "NVEncFilterMsharpen.cu NVEncFilterMsmooth.cu NVEncFilterYadif.cu NVEncFilterBwdif.cu NVEncFilterIvtc.cu \\"
+    substituteInPlace configure \
+      --replace-fail "NVEncFilterSubburn.cpp \\" "NVEncFilterSubburn.cpp NVEncFilterBwdif.cpp NVEncFilterIvtc.cpp \\"
   '';
 
   configurePhase = ''
