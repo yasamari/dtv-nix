@@ -1,0 +1,20 @@
+--- a/index.js	2026-06-17 17:27:50.650315668 +0900
++++ b/index.js	2026-06-17 17:27:50.651874502 +0900
+@@ -114,7 +114,7 @@
+   case 'linux':
+     switch (arch) {
+       case 'x64':
+-        isMusl = readFileSync('/usr/bin/ldd', 'utf8').includes('musl')
++        isMusl = (() => { try { return readFileSync('/usr/bin/ldd', 'utf8').includes('musl') } catch { return false } })()
+         if (isMusl) {
+           localFileExisted = existsSync(join(__dirname, 'crc32.linux-x64-musl.node'))
+           try {
+@@ -140,7 +140,7 @@
+         }
+         break
+       case 'arm64':
+-        isMusl = readFileSync('/usr/bin/ldd', 'utf8').includes('musl')
++        isMusl = (() => { try { return readFileSync('/usr/bin/ldd', 'utf8').includes('musl') } catch { return false } })()
+         if (isMusl) {
+           localFileExisted = existsSync(join(__dirname, 'crc32.linux-arm64-musl.node'))
+           try {
