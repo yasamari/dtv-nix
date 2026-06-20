@@ -17,10 +17,9 @@ pkgs.stdenv.mkDerivation rec {
   };
 
   nativeBuildInputs = with pkgs; [
+    meson
+    ninja
     pkg-config
-    cargo-c
-    git
-    wget
   ];
 
   buildInputs = with pkgs; [
@@ -28,7 +27,6 @@ pkgs.stdenv.mkDerivation rec {
     libass
     libdovi
     hdr10plus
-    cargo
     libplacebo
     vulkan-headers
     libx11
@@ -38,22 +36,42 @@ pkgs.stdenv.mkDerivation rec {
   ];
 
   postPatch = ''
-    substituteInPlace configure \
-      --replace-fail "NVEncFilterYadif.cu \\" "NVEncFilterMsharpen.cu NVEncFilterMsmooth.cu NVEncFilterYadif.cu NVEncFilterBwdif.cu NVEncFilterIvtc.cu \\"
-    substituteInPlace configure \
-      --replace-fail "NVEncFilterSubburn.cpp \\" "NVEncFilterSubburn.cpp NVEncFilterBwdif.cpp NVEncFilterIvtc.cpp \\"
+    substituteInPlace meson.build \
+      --replace-fail \
+        "version: run_command('git', 'describe', '--tags', '--abbrev=0', check: true).stdout().strip()," \
+        "version: '${version}',"
+
+    # Nix CUDA merged package uses lib/ not lib64/, and has no targets/x86_64-linux/
+    substituteInPlace meson.build \
+      --replace-fail "cuda_lib_dir = cuda_path / 'lib64'" \
+        "cuda_lib_dir = cuda_path / 'lib'" \
+      --replace-fail "cuda_target_lib_dir = cuda_path / 'targets' / 'x86_64-linux' / 'lib'" \
+        "cuda_target_lib_dir = cuda_path / 'lib'"
+
+    # NPP / culibos are in separate outputs, not in cudatoolkit lib/
+    substituteInPlace meson.build \
+      --replace-fail \
+        "npp_search_dirs = [cuda_target_lib_dir, cuda_lib_dir]" \
+        "npp_search_dirs = [cuda_target_lib_dir, cuda_lib_dir, '${pkgs.cudaPackages.libnpp.static}/lib', '${pkgs.cudaPackages.cuda_cudart}/lib']"
+
+    # meson's built-in dependency('cuda') doesn't work with Nix CUDA layout
+    substituteInPlace meson.build \
+      --replace-fail \
+        "cuda_dep = dependency('cuda', version: '>=10.0', required: true)" \
+        "cuda_dep = declare_dependency()"
   '';
 
   configurePhase = ''
     runHook preConfigure
 
-    patchShebangs ./configure
+    export CUDA_PATH="${pkgs.cudaPackages.cudatoolkit}"
 
-    ./configure \
-      --disable-vapoursynth \
-      --disable-avisynth \
-      --cuda-path="${pkgs.cudaPackages.cudatoolkit}" \
-      --extra-cudaldflags="-L${pkgs.cudaPackages.libnpp.static}/lib -L${pkgs.cudaPackages.cuda_cudart}/lib/stubs"
+    meson setup build \
+      --buildtype release \
+      --prefix "$out" \
+      -Dnvenc_cuda_dir="${pkgs.cudaPackages.cudatoolkit}" \
+      -Denable_vapoursynth=false \
+      -Denable_avisynth=false
 
     runHook postConfigure
   '';
@@ -61,7 +79,7 @@ pkgs.stdenv.mkDerivation rec {
   buildPhase = ''
     runHook preBuild
 
-    make
+    meson compile -C build
 
     runHook postBuild
   '';
@@ -69,8 +87,7 @@ pkgs.stdenv.mkDerivation rec {
   installPhase = ''
     runHook preInstall
 
-    mkdir -p $out/bin
-    cp -v nvencc $out/bin/
+    meson install -C build
 
     runHook postInstall
   '';
