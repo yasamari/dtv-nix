@@ -1,16 +1,16 @@
 { pkgs, ... }:
 pkgs.buildNpmPackage rec {
   pname = "mirakurun";
-  version = "4.1.0";
+  version = "4.1.2-unstable-2026-06-18";
 
   src = pkgs.fetchFromGitHub {
     owner = "Chinachu";
     repo = "Mirakurun";
-    rev = "f5307be9b16d13d8e29c2ac04c63d0c17e9ad4b7";
-    hash = "sha256-3klXvIRRVNmyUKnSStHGpacEf3ToUEiZi/3S0DBQLkU=";
+    rev = "034352e9e1c43c2ea8613b8c0e01fd34a810c691";
+    hash = "sha256-pJWuD7UEYGjbkquXVFLF+OHOrqSsZN5lNwmrzi0Mue8=";
   };
 
-  npmDepsHash = "sha256-ZTsJjEighSeMpq5+BdbalqbrnuwNTtuk9n5FgvNYz+w=";
+  npmDepsHash = "sha256-fawmDMyPCHKth/LwyL28pggGgF05VNDZ66EbH91BhO0=";
 
   nativeBuildInputs = [
     pkgs.dos2unix
