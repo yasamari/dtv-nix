@@ -5,19 +5,19 @@ let
   materialWebUiSrc = pkgs.fetchFromGitHub {
     owner = "EMWUI";
     repo = "EDCB_Material_WebUI";
-    rev = "68854a2a93beaf1d646b044232d7d05ae0db84fd";
-    hash = "sha256-h8pp6TFxksAA7Atr++TYkNMvZqE+3edPiK4ljaSoUL0=";
+    rev = "e46b4930f4d6c3d1842a1dcfe24fc03c3452f010";
+    hash = "sha256-wXsQ/E9k0Rd0gJOcru+3Y8sZ4Su8Kp0skQynRoEH95A=";
   };
 in
 pkgs.stdenv.mkDerivation rec {
   pname = "edcb";
-  version = "work-plus-s-240212";
+  version = "0-unstable-2026-07-03";
 
   src = pkgs.fetchFromGitHub {
     owner = "tkntrec";
     repo = "EDCB";
-    rev = "2218c9789a1ee8355bd11b3d7eddb55888756c5e";
-    hash = "sha256-PSiEaleQWnUX1ateGRablROj37Q02NenRo8dvxJH/Pw=";
+    rev = "529e92e8f927fd22086152ce2b19c4808be990fe";
+    hash = "sha256-MWY1ds6G30AMXFR0KwfjkfxZ/XjbMIYFhTP7j1KDfYc=";
   };
 
   strictDeps = true;
@@ -70,7 +70,7 @@ pkgs.stdenv.mkDerivation rec {
     cp -a ini/HttpPublic "$out/share/edcb/ini/HttpPublic"
 
     cp -a "${materialWebUiSrc}/HttpPublic/api" "$out/share/edcb/ini/HttpPublic/api"
-    cp -a "${materialWebUiSrc}/HttpPublic/EMWUI" "$out/share/edcb/ini/HttpPublic/EMWUI"
+    cp -a "${materialWebUiSrc}/HttpPublic/E3" "$out/share/edcb/ini/HttpPublic/E3"
 
     install -m 0644 "${materialWebUiSrc}/Setting/HttpPublic.ini" "$out/share/edcb/ini/Setting/HttpPublic.ini"
     install -m 0644 "${materialWebUiSrc}/Setting/XCODE_OPTIONS.lua" "$out/share/edcb/ini/Setting/XCODE_OPTIONS.lua"
