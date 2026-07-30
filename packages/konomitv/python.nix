@@ -238,6 +238,16 @@ let
       license = licenses.agpl3Only;
     };
   };
+
+  atproto = py.atproto.overrideAttrs rec {
+    version = "0.0.68";
+    src = pkgs.fetchFromGitHub {
+      owner = "MarshalX";
+      repo = "atproto";
+      tag = "v${version}";
+      hash = "sha256-z5/CLC2pxp2cFNZQsnQT96g8y2CFjNmiEatu8yEmYHw=";
+    };
+  };
 in
 {
   inherit python;
@@ -249,9 +259,9 @@ in
     hashids
     tortoiseOrm
     zendriver
+    atproto
     py.aiofiles
     py.aiohttp
-    py.atproto
     py.av
     py.bcrypt
     py.beautifulsoup4
