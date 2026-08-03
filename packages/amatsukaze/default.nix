@@ -20,6 +20,7 @@ let
   inherit (common)
     version
     src
+    danmaku2ass
     dotnetSdk
     dotnetRuntime
     dotnetVersionPatch
@@ -93,6 +94,8 @@ pkgs.buildDotnetModule {
   postPatch = dotnetVersionPatch + ''
     substituteInPlace AmatsukazeServer/Server/EncodeServer.cs \
       --replace-fail 'setting.AmatsukazePath = Path.Combine(basePath, "AmatsukazeCLI" + exeDefaultAppendix);' 'setting.AmatsukazePath = "AmatsukazeCLI";'
+    substituteInPlace AmatsukazeServer/Server/EncodeServer.cs \
+      --replace-fail 'setting.NicoConvASSPath = Path.Combine(basePath, "nicojk_ass.py");' 'setting.NicoConvASSPath = "nicojk_ass.py";'
   '';
 
   dotnetBuildFlags = [
@@ -121,8 +124,14 @@ pkgs.buildDotnetModule {
     cp -a scripts/. "$shareDir/scripts/"
     cp -a "${joinLogoScp}/share/join_logo_scp/JL" "$shareDir/JL"
 
+    cp -a "${danmaku2ass}/danmaku2ass.py" "$shareDir/scripts/"
+    chmod +x "$shareDir/scripts/nicojk_ass.py" "$shareDir/scripts/danmaku2ass.py"
+    ln -s "$shareDir/scripts/nicojk_ass.py" "$out/bin/nicojk_ass.py"
+    ln -s "$shareDir/scripts/danmaku2ass.py" "$out/bin/danmaku2ass.py"
+
     mkdir -p "$exeDir/plugins64"
     cp -a defaults/exe_files/plugins64/. "$exeDir/plugins64/"
+    cp -a defaults/exe_files/ch_sid.txt "$exeDir/"
 
     shopt -s nullglob
     for pluginPath in \
