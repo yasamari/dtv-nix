@@ -28,8 +28,7 @@
 let
   intelMediaRuntime = if useLegacyIntel then pkgs.intel-media-sdk else pkgs.vpl-gpu-rt;
 
-  intelComputeRuntime =
-    if useLegacyIntel then pkgs.intel-compute-runtime-legacy1 else pkgs.intel-compute-runtime;
+  intelComputeRuntime = pkgs.intel-compute-runtime;
 in
 pkgs.stdenv.mkDerivation rec {
   pname = "qsvenc";
