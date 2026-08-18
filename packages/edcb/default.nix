@@ -5,8 +5,8 @@ let
   materialWebUiSrc = pkgs.fetchFromGitHub {
     owner = "EMWUI";
     repo = "EDCB_Material_WebUI";
-    rev = "1104c0e34d0d96d8516204219d3ce4f85e3e9618";
-    hash = "sha256-RSSQGvqm8R1PkvEhi1hCB44Qj3K/Rwg9J8iiH7pNF1g=";
+    rev = "e82b0e765f531cead2ad7b56693ab4a33ab52b44";
+    hash = "sha256-8vP0Rj5brdZwDJ0o1d0ZyhNBGQ9tug9cBUorZiDdDZE=";
   };
 in
 pkgs.stdenv.mkDerivation rec {
