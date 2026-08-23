@@ -4,7 +4,7 @@
 }:
 pkgs.stdenv.mkDerivation rec {
   pname = "nvenc";
-  version = "9.31";
+  version = "9.32";
 
   hardeningDisable = [ "all" ];
 
@@ -12,7 +12,7 @@ pkgs.stdenv.mkDerivation rec {
     owner = "rigaya";
     repo = "NVEnc";
     tag = version;
-    hash = "sha256-eOc3Yuvc5IIIsyEYv7nzfn3kmBfrNJ2CEYXfb/8o9uc=";
+    hash = "sha256-fzPLOr6TG+4bOG7xWWbNg6o6Be3bg2bu1Nz2gfETwmQ=";
     fetchSubmodules = true;
   };
 
@@ -24,6 +24,13 @@ pkgs.stdenv.mkDerivation rec {
 
   buildInputs = with pkgs; [
     ffmpeg
+    fontconfig
+    freetype
+    fribidi
+    glib
+    harfbuzz
+    libsysprof-capture
+    pcre2
     libass
     libdovi
     hdr10plus
