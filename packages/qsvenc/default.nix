@@ -32,7 +32,7 @@ let
 in
 pkgs.stdenv.mkDerivation rec {
   pname = "qsvenc";
-  version = "8.26";
+  version = "8.27";
 
   hardeningDisable = [ "all" ];
 
@@ -40,7 +40,7 @@ pkgs.stdenv.mkDerivation rec {
     owner = "rigaya";
     repo = "QSVEnc";
     tag = version;
-    hash = "sha256-q0dfSFd1OTve6yoyP3CsCl3UUniKU1694aRD/21sMk0=";
+    hash = "sha256-1WtgMuftxEXj6Vf+nvz+fm1PKQ+4XCvmEIHBkF4Q864=";
     fetchSubmodules = true;
   };
 
@@ -61,6 +61,12 @@ pkgs.stdenv.mkDerivation rec {
     libdrm
     ffmpeg
     libass
+    fribidi
+    fontconfig
+    harfbuzz
+    glib
+    libsysprof-capture
+    pcre2
     libvpl
     opencl-headers
     ocl-icd
