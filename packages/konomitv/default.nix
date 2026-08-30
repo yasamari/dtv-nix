@@ -5,15 +5,15 @@
   ...
 }:
 let
-  version = "0.14.1-unstable-2026-08-26";
+  version = "0.14.1-unstable-2026-08-30";
   python = pkgs.python313;
   py = python.pkgs;
 
   konomitvSrc = pkgs.fetchFromGitHub {
     owner = "tsukumijima";
     repo = "KonomiTV";
-    rev = "5cbbd34827bc1ce3461e8a716964f50616202bc9";
-    hash = "sha256-G11iw9AJr9UPoOQkLTVDpJSzo4Qr05rv5t8LzXe0sp8=";
+    rev = "5c3c46460b4102344866f14b6736b12ff428570b";
+    hash = "sha256-iUl2fzjmxNZzii9G39ygTwOAygjwvHFeUvQSaBY1K9k=";
   };
 
   clientBundle = import ./client-bundle.nix {
