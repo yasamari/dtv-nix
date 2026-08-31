@@ -5,19 +5,19 @@ let
   materialWebUiSrc = pkgs.fetchFromGitHub {
     owner = "EMWUI";
     repo = "EDCB_Material_WebUI";
-    rev = "cc85035bc9c1607fcfb2839bcb02fb9c71459bc5";
-    hash = "sha256-k468iE6ufYH2Edg+SXsZ73Bhbf3BwZbUT4+siBPo1W4=";
+    rev = "386fab624c4e0c85bf1908a45c98aa513d9dcb46";
+    hash = "sha256-Cnltp6ZH+wRqv34w2tTdhYOGqywvo4Q67WKj7cBQKHw=";
   };
 in
 pkgs.stdenv.mkDerivation rec {
   pname = "edcb";
-  version = "0-unstable-2026-07-03";
+  version = "0-unstable-2026-08-27";
 
   src = pkgs.fetchFromGitHub {
     owner = "tkntrec";
     repo = "EDCB";
-    rev = "529e92e8f927fd22086152ce2b19c4808be990fe";
-    hash = "sha256-MWY1ds6G30AMXFR0KwfjkfxZ/XjbMIYFhTP7j1KDfYc=";
+    rev = "a2bdece0fd5cace22441b9fad8300ce4cf37cbbc";
+    hash = "sha256-4SXgAEDCCtglseU/NXJrltRQ84efZs3lmTGTcDWe82M=";
   };
 
   strictDeps = true;
