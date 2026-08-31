@@ -4,7 +4,7 @@
 }:
 pkgs.stdenv.mkDerivation rec {
   pname = "nvenc";
-  version = "9.32";
+  version = "9.33";
 
   hardeningDisable = [ "all" ];
 
@@ -12,7 +12,7 @@ pkgs.stdenv.mkDerivation rec {
     owner = "rigaya";
     repo = "NVEnc";
     tag = version;
-    hash = "sha256-fzPLOr6TG+4bOG7xWWbNg6o6Be3bg2bu1Nz2gfETwmQ=";
+    hash = "sha256-4Fpkk/mrQMck2C9F25f9sokm4LqGeCa1x8zHPFYhxI4=";
     fetchSubmodules = true;
   };
 
@@ -48,11 +48,11 @@ pkgs.stdenv.mkDerivation rec {
         "version: run_command('git', 'describe', '--tags', '--abbrev=0', check: true).stdout().strip()," \
         "version: '${version}',"
 
-    # Nix CUDA merged package uses lib/ not lib64/, and has no targets/x86_64-linux/
+    # Nix CUDA merged package uses lib/ not lib64/, and has no targets/<triple>/
     substituteInPlace meson.build \
       --replace-fail "cuda_lib_dir = cuda_path / 'lib64'" \
         "cuda_lib_dir = cuda_path / 'lib'" \
-      --replace-fail "cuda_target_lib_dir = cuda_path / 'targets' / 'x86_64-linux' / 'lib'" \
+      --replace-fail "cuda_target_lib_dir = cuda_path / 'targets' / cuda_target_name / 'lib'" \
         "cuda_target_lib_dir = cuda_path / 'lib'"
 
     # NPP / culibos are in separate outputs, not in cudatoolkit lib/
