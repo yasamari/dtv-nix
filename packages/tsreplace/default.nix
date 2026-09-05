@@ -1,13 +1,13 @@
 { pkgs, ... }:
 pkgs.stdenv.mkDerivation rec {
   pname = "tsreplace";
-  version = "0.19";
+  version = "0.20";
 
   src = pkgs.fetchFromGitHub {
     owner = "rigaya";
     repo = "tsreplace";
     tag = version;
-    hash = "sha256-LIz237ngKpLVWkHtOv+V5i5xIi3Y1v1NLG4T52qO0aA=";
+    hash = "sha256-EZs5Ly7XpAJ3dGAaJcuc3rzbT6q0iD1mzxaFTu0wgAk=";
   };
 
   nativeBuildInputs = with pkgs; [
@@ -22,10 +22,7 @@ pkgs.stdenv.mkDerivation rec {
 
   postPatch = ''
     substituteInPlace meson.build \
-      --replace-fail "version: run_command('git', 'describe', '--tags', '--abbrev=0', check: true).stdout().strip()," "version: '${version}',"
-
-    substituteInPlace app/rgy_log.cpp \
-      --replace-fail "ret = _ftprintf(stderr, mes);" "ret = _ftprintf(stderr, _T(\"%s\"), mes);"
+      --replace-fail "version: run_command('bash', 'scripts/get-version.sh', check: true).stdout().strip()," "version: '${version}',"
   '';
 
   meta = with pkgs.lib; {
