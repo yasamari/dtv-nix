@@ -3,7 +3,7 @@
   perSystem,
 }:
 let
-  version = "1.0.9.0";
+  version = "1.1.0.0";
 
   src = pkgs.fetchFromGitHub {
     owner = "rigaya";
