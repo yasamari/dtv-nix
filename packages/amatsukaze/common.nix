@@ -9,7 +9,7 @@ let
     owner = "rigaya";
     repo = "Amatsukaze";
     tag = version;
-    hash = "sha256-G0/hecM8WpP0C/TYrMOHK2Hydx+EHHWQZWAAyvdKCOE=";
+    hash = "sha256-AbkPGUA+itwJKmp6gFsHPlW5wRvqFKDwIPdmtV5xgqE=";
     fetchSubmodules = true;
   };
 
