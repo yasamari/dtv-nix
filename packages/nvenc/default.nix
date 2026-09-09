@@ -4,7 +4,7 @@
 }:
 pkgs.stdenv.mkDerivation rec {
   pname = "nvenc";
-  version = "9.33";
+  version = "9.34";
 
   hardeningDisable = [ "all" ];
 
@@ -12,7 +12,7 @@ pkgs.stdenv.mkDerivation rec {
     owner = "rigaya";
     repo = "NVEnc";
     tag = version;
-    hash = "sha256-4Fpkk/mrQMck2C9F25f9sokm4LqGeCa1x8zHPFYhxI4=";
+    hash = "sha256-YXX0T/AApkBBXgftv55BvtMrUUWEQH/LfFuY66xPMUs=";
     fetchSubmodules = true;
   };
 
@@ -45,7 +45,7 @@ pkgs.stdenv.mkDerivation rec {
   postPatch = ''
     substituteInPlace meson.build \
       --replace-fail \
-        "version: run_command('git', 'describe', '--tags', '--abbrev=0', check: true).stdout().strip()," \
+        "version: run_command('sh', 'scripts/get-version.sh', check: true).stdout().strip()," \
         "version: '${version}',"
 
     # Nix CUDA merged package uses lib/ not lib64/, and has no targets/<triple>/
