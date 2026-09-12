@@ -72,6 +72,13 @@ pkgs.stdenv.mkDerivation rec {
     cp -a "${materialWebUiSrc}/HttpPublic/api" "$out/share/edcb/ini/HttpPublic/api"
     cp -a "${materialWebUiSrc}/HttpPublic/E3" "$out/share/edcb/ini/HttpPublic/E3"
 
+    # Upstream GetAppConfig() concatenates nil `zip` when [NVRAM] ZIP is unset,
+    # aborting every GET /E3/ with a Lua "attempt to concatenate" error that
+    # surfaces as HTTP 502 via reverse proxies. Guard against nil.
+    chmod u+w "$out/share/edcb/ini/HttpPublic/E3/util.lua"
+    substituteInPlace "$out/share/edcb/ini/HttpPublic/E3/util.lua" \
+      --replace-fail '..zip..' '..(zip or "")..'
+
     install -m 0644 "${materialWebUiSrc}/Setting/HttpPublic.ini" "$out/share/edcb/ini/Setting/HttpPublic.ini"
     install -m 0644 "${materialWebUiSrc}/Setting/XCODE_OPTIONS.lua" "$out/share/edcb/ini/Setting/XCODE_OPTIONS.lua"
 
