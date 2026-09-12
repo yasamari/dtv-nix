@@ -11,13 +11,13 @@ let
 in
 pkgs.stdenv.mkDerivation rec {
   pname = "edcb";
-  version = "0-unstable-2026-08-27";
+  version = "0-unstable-2026-09-05";
 
   src = pkgs.fetchFromGitHub {
     owner = "tkntrec";
     repo = "EDCB";
-    rev = "a2bdece0fd5cace22441b9fad8300ce4cf37cbbc";
-    hash = "sha256-4SXgAEDCCtglseU/NXJrltRQ84efZs3lmTGTcDWe82M=";
+    rev = "84da43e95dcb905b9f641056ed489743de6dba4d";
+    hash = "sha256-Lh0xs/c4rXadZA2Xp+2fSsZrlV6VWkcSa43QFjtsmvI=";
   };
 
   strictDeps = true;
