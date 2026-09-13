@@ -29,6 +29,16 @@ If these files are later added, treat them as higher priority than this file.
   Categories: `apps`, `avisynth`, `encoders`, `python`, `ts`, `tuners`.
 - `packages/apps/konomitv/source.nix`: shared KonomiTV version/source helper,
   reached via a `callPackage` function argument (not an overlay attr).
+- `packages/apps/amatsukaze/`: `amatsukaze` bundle sources; `common.nix` is the
+  shared version/source/dotnet helper, `deps.json` is the shared NuGet lock.
+  Regenerate it with `packages/apps/amatsukaze/update-deps.sh` (requires
+  network); never hand-edit `deps.json`.
+- Amatsukaze is split per upstream project: `amatsukaze-server-cli`,
+  `amatsukaze-script-command`, `amatsukaze-add-task` (framework-dependent
+  dotnet builds sharing `deps.json`), `amatsukaze-native` (meson),
+  `amatsukaze-webui` (Blazor static files), `danmaku2ass` (script).
+  `amatsukaze` itself is a stdenv assembly of those pieces; keep its
+  `exe_files`/`share` layout and `mainProgram` stable for the NixOS module.
 - `packages/<name>/default.nix`: package derivations and wrappers.
 - `modules/nixos/*.nix`: NixOS service modules.
 - `modules/nixos/edcb/default.nix`: EDCB module directory form.

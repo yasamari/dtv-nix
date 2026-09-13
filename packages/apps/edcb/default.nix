@@ -2,6 +2,7 @@
   lib,
   stdenv,
   fetchFromGitHub,
+  edcb-material-webui,
   gnumake,
   glibc,
   openssl,
@@ -12,12 +13,7 @@
   ...
 }:
 let
-  materialWebUiSrc = fetchFromGitHub {
-    owner = "EMWUI";
-    repo = "EDCB_Material_WebUI";
-    rev = "9e4ca29ac9f6c8ce05574e8e25ed4dd436625a1c";
-    hash = "sha256-pakYstzImCpX/lMeT+Zg1/K+hJfli9rabxtPq5XSiJk=";
-  };
+  materialWebUi = "${edcb-material-webui}/share/edcb-material-webui";
 in
 stdenv.mkDerivation rec {
   pname = "edcb";
@@ -79,8 +75,8 @@ stdenv.mkDerivation rec {
 
     cp -a ini/HttpPublic "$out/share/edcb/ini/HttpPublic"
 
-    cp -a "${materialWebUiSrc}/HttpPublic/api" "$out/share/edcb/ini/HttpPublic/api"
-    cp -a "${materialWebUiSrc}/HttpPublic/E3" "$out/share/edcb/ini/HttpPublic/E3"
+    cp -a "${materialWebUi}/HttpPublic/api" "$out/share/edcb/ini/HttpPublic/api"
+    cp -a "${materialWebUi}/HttpPublic/E3" "$out/share/edcb/ini/HttpPublic/E3"
 
     # Upstream GetAppConfig() concatenates nil `zip` when [NVRAM] ZIP is unset,
     # aborting every GET /E3/ with a Lua "attempt to concatenate" error that
@@ -89,8 +85,8 @@ stdenv.mkDerivation rec {
     substituteInPlace "$out/share/edcb/ini/HttpPublic/E3/util.lua" \
       --replace-fail '..zip..' '..(zip or "")..'
 
-    install -m 0644 "${materialWebUiSrc}/Setting/HttpPublic.ini" "$out/share/edcb/ini/Setting/HttpPublic.ini"
-    install -m 0644 "${materialWebUiSrc}/Setting/XCODE_OPTIONS.lua" "$out/share/edcb/ini/Setting/XCODE_OPTIONS.lua"
+    install -m 0644 "${materialWebUi}/Setting/HttpPublic.ini" "$out/share/edcb/ini/Setting/HttpPublic.ini"
+    install -m 0644 "${materialWebUi}/Setting/XCODE_OPTIONS.lua" "$out/share/edcb/ini/Setting/XCODE_OPTIONS.lua"
 
     ${glibc.bin}/bin/iconv -f CP932 -t UTF-8 ini/Bitrate.ini | tr -d '\r' > "$out/share/edcb/ini/Bitrate.ini"
     ${glibc.bin}/bin/iconv -f CP932 -t UTF-8 ini/BonCtrl.ini | tr -d '\r' | ${gnused}/bin/sed 's/\.dll$/.so/' > "$out/share/edcb/ini/BonCtrl.ini"

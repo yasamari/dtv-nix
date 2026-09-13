@@ -1,10 +1,5 @@
 [
   {
-    "pname": "log4net",
-    "version": "2.0.15",
-    "hash": "sha256-y44EvjW7ZFRCJ3xLa+AGBW81ZI1ZykOEpSVU8EHLAcc="
-  },
-  {
     "pname": "Microsoft.AspNetCore.Authorization",
     "version": "10.0.0",
     "hash": "sha256-g1MagKFkZF0LttdK5GLdHCXe4d1qOXv57ngz7XnhRrk="
@@ -183,5 +178,10 @@
     "pname": "System.Security.Permissions",
     "version": "4.5.0",
     "hash": "sha256-Fa6dX6Gyse1A/RBoin8cVaHQePbfBvp6jjWxUXPhXKQ="
+  },
+  {
+    "pname": "log4net",
+    "version": "2.0.15",
+    "hash": "sha256-y44EvjW7ZFRCJ3xLa+AGBW81ZI1ZykOEpSVU8EHLAcc="
   }
 ]

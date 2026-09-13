@@ -14,13 +14,6 @@ let
     fetchSubmodules = true;
   };
 
-  danmaku2ass = fetchFromGitHub {
-    owner = "m13253";
-    repo = "danmaku2ass";
-    rev = "ced881747670c2eb1c0dbd292c2a567f444b056a";
-    hash = "sha256-yhfioN3/E46vFU1xT68OEM2OymBsB5XI+8WdotD745o=";
-  };
-
   dotnetSdk = dotnetCorePackages.sdk_10_0;
   dotnetRuntime = dotnetCorePackages.aspnetcore_10_0;
 
@@ -43,7 +36,6 @@ in
   inherit
     version
     src
-    danmaku2ass
     dotnetSdk
     dotnetRuntime
     mesonVersionPatch

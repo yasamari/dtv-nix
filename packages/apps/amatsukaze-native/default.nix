@@ -1,6 +1,7 @@
 {
   lib,
   stdenv,
+  callPackage,
   meson,
   ninja,
   pkg-config,
@@ -8,11 +9,12 @@
   libjpeg_turbo,
   openssl,
   zlib,
-  common,
   ffmpeg,
-  avisynthplusCuda,
+  avisynthplus-cuda,
 }:
 let
+  avisynthplusCuda = avisynthplus-cuda;
+  common = callPackage ../amatsukaze/common.nix { };
   inherit (common)
     version
     src

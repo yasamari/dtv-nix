@@ -8,10 +8,10 @@ let
   common = callPackage ../amatsukaze/common.nix { };
 in
 buildDotnetModule {
-  pname = "amatsukaze-add-task";
+  pname = "amatsukaze-script-command";
   inherit (common) version src;
 
-  projectFile = "AmatsukazeAddTask/AmatsukazeAddTask.csproj";
+  projectFile = "ScriptCommand/ScriptCommand.csproj";
   nugetDeps = ../amatsukaze/deps.json;
 
   dotnet-sdk = common.dotnetSdk;
@@ -31,11 +31,11 @@ buildDotnetModule {
   ];
 
   meta = with lib; {
-    description = "Task addition utility for Amatsukaze";
+    description = "Script command utility for Amatsukaze";
     homepage = "https://github.com/rigaya/Amatsukaze";
     license = licenses.mit;
     maintainers = [ ];
-    mainProgram = "AmatsukazeAddTask";
-    platforms = platforms.linux;
+    mainProgram = "ScriptCommand";
+    platforms = [ "x86_64-linux" ];
   };
 }

@@ -1,21 +1,19 @@
 {
   lib,
   stdenv,
-  fetchFromGitHub,
+  callPackage,
   linuxPackages,
   kernel ? linuxPackages.kernel,
   ...
 }:
+let
+  inherit (callPackage ./source.nix { }) version px4DrvSrc;
+in
 stdenv.mkDerivation {
   pname = "px4_drv";
-  version = "develop-a86ff8f";
+  inherit version;
 
-  src = fetchFromGitHub {
-    owner = "yyya-nico";
-    repo = "px4_drv";
-    rev = "a86ff8fcb151e7ccb76b0a73532632cbbd0cc27a";
-    hash = "sha256-LrybxOi2+E7AQmSJYNBrI3XbiFNFSTeeId3Lw9LD0Eo=";
-  };
+  src = px4DrvSrc;
 
   sourceRoot = "source/driver";
 

@@ -1,10 +1,16 @@
 final: prev: {
   # apps
   akebi = final.callPackage ./packages/apps/akebi { };
-  amatsukaze-add-task = final.callPackage ./packages/apps/amatsukaze-add-task { };
   amatsukaze = final.callPackage ./packages/apps/amatsukaze { };
+  amatsukaze-add-task = final.callPackage ./packages/apps/amatsukaze-add-task { };
+  amatsukaze-native = final.callPackage ./packages/apps/amatsukaze-native { };
+  amatsukaze-script-command = final.callPackage ./packages/apps/amatsukaze-script-command { };
+  amatsukaze-server-cli = final.callPackage ./packages/apps/amatsukaze-server-cli { };
+  amatsukaze-webui = final.callPackage ./packages/apps/amatsukaze-webui { };
   chapter_exe = final.callPackage ./packages/apps/chapter_exe { };
+  danmaku2ass = final.callPackage ./packages/apps/danmaku2ass { };
   edcb = final.callPackage ./packages/apps/edcb { };
+  edcb-material-webui = final.callPackage ./packages/apps/edcb-material-webui { };
   isdbscanner = final.callPackage ./packages/apps/isdbscanner { };
   join_logo_scp = final.callPackage ./packages/apps/join_logo_scp { };
   konomitv = final.callPackage ./packages/apps/konomitv { };

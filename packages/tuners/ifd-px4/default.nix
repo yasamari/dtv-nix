@@ -1,20 +1,18 @@
 {
   lib,
   stdenv,
-  fetchFromGitHub,
+  callPackage,
   pcsclite,
   ...
 }:
+let
+  inherit (callPackage ../px4_drv/source.nix { }) version px4DrvSrc;
+in
 stdenv.mkDerivation {
   pname = "ifd-px4";
-  version = "develop-a86ff8f";
+  inherit version;
 
-  src = fetchFromGitHub {
-    owner = "yyya-nico";
-    repo = "px4_drv";
-    rev = "a86ff8fcb151e7ccb76b0a73532632cbbd0cc27a";
-    hash = "sha256-LrybxOi2+E7AQmSJYNBrI3XbiFNFSTeeId3Lw9LD0Eo=";
-  };
+  src = px4DrvSrc;
 
   sourceRoot = "source/userland/ifd-px4";
 

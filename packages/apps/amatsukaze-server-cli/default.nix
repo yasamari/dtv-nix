@@ -8,10 +8,10 @@ let
   common = callPackage ../amatsukaze/common.nix { };
 in
 buildDotnetModule {
-  pname = "amatsukaze-add-task";
+  pname = "amatsukaze-server-cli";
   inherit (common) version src;
 
-  projectFile = "AmatsukazeAddTask/AmatsukazeAddTask.csproj";
+  projectFile = "AmatsukazeServerCLI/AmatsukazeServerCLI.csproj";
   nugetDeps = ../amatsukaze/deps.json;
 
   dotnet-sdk = common.dotnetSdk;
@@ -31,11 +31,11 @@ buildDotnetModule {
   ];
 
   meta = with lib; {
-    description = "Task addition utility for Amatsukaze";
+    description = "Amatsukaze server command line interface";
     homepage = "https://github.com/rigaya/Amatsukaze";
     license = licenses.mit;
     maintainers = [ ];
-    mainProgram = "AmatsukazeAddTask";
-    platforms = platforms.linux;
+    mainProgram = "AmatsukazeServerCLI";
+    platforms = [ "x86_64-linux" ];
   };
 }
