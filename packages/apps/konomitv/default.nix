@@ -10,8 +10,8 @@
   tsreadex,
   psisiarc,
   psisimux,
-  qsvenc,
-  nvenc,
+  qsvenc ? null,
+  nvenc ? null,
   asyncio-atexit,
   hashids,
   grapheme,
@@ -78,8 +78,24 @@ let
 
   # QSVEnc/NVEnc are x86_64-only; never touch them on other systems so that
   # merely evaluating this package does not pull in unsupported derivations.
-  qsvenccPath = if stdenv.hostPlatform.isx86_64 then "${qsvenc}/bin/qsvencc" else "";
-  nvenccPath = if stdenv.hostPlatform.isx86_64 then "${nvenc}/bin/nvencc" else "";
+  # Null means "encoder not available" (e.g. via `.override { qsvenc = null; }`).
+  # The arch guard must come after the null check so that a null override on
+  # x86_64 never stringifies null, and so that merely evaluating this package
+  # on other architectures does not pull the x86_64-only encoders in.
+  qsvenccPath =
+    if qsvenc == null then
+      ""
+    else if stdenv.hostPlatform.isx86_64 then
+      "${qsvenc}/bin/qsvencc"
+    else
+      "";
+  nvenccPath =
+    if nvenc == null then
+      ""
+    else if stdenv.hostPlatform.isx86_64 then
+      "${nvenc}/bin/nvencc"
+    else
+      "";
 in
 py.buildPythonApplication rec {
   pname = "konomitv";
