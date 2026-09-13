@@ -1,4 +1,3 @@
-{ flake, ... }:
 {
   config,
   pkgs,
@@ -18,22 +17,22 @@ in
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = flake.packages.${pkgs.stdenv.hostPlatform.system}.px4_drv;
-      defaultText = lib.literalExpression "flake.packages.${pkgs.stdenv.hostPlatform.system}.px4_drv";
+      default = pkgs.px4_drv;
+      defaultText = lib.literalExpression "pkgs.px4_drv";
       description = "使用するpx4_drvパッケージ。";
     };
 
     it930xFirmwarePackage = lib.mkOption {
       type = lib.types.package;
-      default = flake.packages.${pkgs.stdenv.hostPlatform.system}.it930x-firmware;
-      defaultText = lib.literalExpression "flake.packages.${pkgs.stdenv.hostPlatform.system}.it930x-firmware";
+      default = pkgs.it930x-firmware;
+      defaultText = lib.literalExpression "pkgs.it930x-firmware";
       description = "使用するit930x-firmwareパッケージ。";
     };
 
     ifdPx4Package = lib.mkOption {
       type = lib.types.package;
-      default = flake.packages.${pkgs.stdenv.hostPlatform.system}.ifd-px4;
-      defaultText = lib.literalExpression "flake.packages.${pkgs.stdenv.hostPlatform.system}.ifd-px4";
+      default = pkgs.ifd-px4;
+      defaultText = lib.literalExpression "pkgs.ifd-px4";
       description = "使用するifd-px4パッケージ。";
     };
 

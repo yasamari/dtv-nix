@@ -1,4 +1,3 @@
-{ flake, ... }:
 {
   config,
   lib,
@@ -47,8 +46,8 @@ in
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = flake.packages.${pkgs.stdenv.hostPlatform.system}.konomitv;
-      defaultText = lib.literalExpression "flake.packages.${pkgs.stdenv.hostPlatform.system}.konomitv";
+      default = pkgs.konomitv;
+      defaultText = lib.literalExpression "pkgs.konomitv";
       description = "実行に使用する KonomiTV パッケージ。";
     };
 

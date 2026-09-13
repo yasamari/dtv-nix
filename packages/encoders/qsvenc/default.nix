@@ -1,0 +1,174 @@
+# https://github.com/spotdemo4/nur/blob/main/packages/qsvenc/default.nix
+
+# MIT License
+#
+# Copyright (c) 2025 Trev
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+{
+  lib,
+  stdenv,
+  fetchFromGitHub,
+  cargo,
+  cmake,
+  git,
+  makeWrapper,
+  meson,
+  pkg-config,
+  cargo-c,
+  ninja,
+  libva,
+  libdrm,
+  ffmpeg,
+  libass,
+  fribidi,
+  fontconfig,
+  harfbuzz,
+  glib,
+  libsysprof-capture,
+  pcre2,
+  libvpl,
+  opencl-headers,
+  ocl-icd,
+  libx11,
+  libdovi,
+  hdr10plus,
+  intel-media-driver,
+  intel-media-sdk,
+  vpl-gpu-rt,
+  intel-compute-runtime,
+  cmrt,
+  useLegacyIntel ? false,
+}:
+let
+  intelMediaRuntime = if useLegacyIntel then intel-media-sdk else vpl-gpu-rt;
+
+  intelComputeRuntime = intel-compute-runtime;
+in
+stdenv.mkDerivation rec {
+  pname = "qsvenc";
+  version = "8.30";
+
+  hardeningDisable = [ "all" ];
+
+  src = fetchFromGitHub {
+    owner = "rigaya";
+    repo = "QSVEnc";
+    tag = version;
+    hash = "sha256-XI1VBks4IJl/l66wS+Zsd8EFeigOrVGifZcToYKqygo=";
+    fetchSubmodules = true;
+  };
+
+  nativeBuildInputs = [
+    cargo
+    cmake
+    git
+    makeWrapper
+    meson
+    pkg-config
+    cargo-c
+    ninja
+  ];
+
+  buildInputs = [
+    # libs
+    libva
+    libdrm
+    ffmpeg
+    libass
+    fribidi
+    fontconfig
+    harfbuzz
+    glib
+    libsysprof-capture
+    pcre2
+    libvpl
+    opencl-headers
+    ocl-icd
+    libx11
+    libdovi
+    hdr10plus
+
+    # intel
+    intel-media-driver
+    intelMediaRuntime
+    intelComputeRuntime
+    cmrt
+  ];
+
+  postPatch = ''
+    substituteInPlace meson.build \
+      --replace-fail \
+        "version: run_command('sh', 'scripts/get-version.sh', check: true).stdout().strip()," \
+        "version: '${version}',"
+  '';
+
+  configurePhase = ''
+    runHook preConfigure
+
+    meson setup build \
+      --buildtype release \
+      --prefix "$out" \
+      -Dopencl_headers=${opencl-headers}/include \
+      -Denable_avisynth=false \
+      -Denable_vapoursynth=false
+
+    runHook postConfigure
+  '';
+
+  buildPhase = ''
+    runHook preBuild
+
+    meson compile -C build
+
+    runHook postBuild
+  '';
+
+  installPhase = ''
+    runHook preInstall
+
+    meson install -C build
+
+    wrapProgram $out/bin/qsvencc \
+      --prefix LD_LIBRARY_PATH : "${
+        lib.makeLibraryPath [
+          intel-media-driver
+          intelMediaRuntime
+          intelComputeRuntime
+          libva
+          libdrm
+          ocl-icd
+        ]
+      }" \
+      --set LIBVA_DRIVER_NAME iHD \
+      --prefix LIBVA_DRIVERS_PATH : "${intel-media-driver}/lib/dri" \
+      --prefix OCL_ICD_VENDORS : "${intelComputeRuntime}/etc/OpenCL/vendors"
+
+    runHook postInstall
+  '';
+
+  meta = with lib; {
+    homepage = "https://github.com/rigaya/QSVEnc";
+    mainProgram = "qsvencc";
+    changelog = "https://github.com/rigaya/QSVEnc/releases/tag/${src.tag}";
+    description = "QSV high-speed encoding performance experiment tool";
+    license = licenses.mit;
+    platforms = [ "x86_64-linux" ];
+  };
+}

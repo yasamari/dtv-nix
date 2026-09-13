@@ -1,4 +1,3 @@
-{ flake, ... }:
 {
   config,
   lib,
@@ -50,7 +49,7 @@ let
     '') edcbLibs
   );
 
-  bonDriver = flake.packages.${pkgs.stdenv.hostPlatform.system}.bondriver_linuxmirakc;
+  bonDriver = pkgs.bondriver_linuxmirakc;
 
   generateBonDriverIni =
     priority:
@@ -133,8 +132,8 @@ in
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = flake.packages.${pkgs.stdenv.hostPlatform.system}.edcb;
-      defaultText = lib.literalExpression "flake.packages.${pkgs.stdenv.hostPlatform.system}.edcb";
+      default = pkgs.edcb;
+      defaultText = lib.literalExpression "pkgs.edcb";
       description = "実行に使用する EDCB パッケージ。";
     };
 

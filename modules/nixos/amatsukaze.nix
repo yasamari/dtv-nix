@@ -1,4 +1,3 @@
-{ flake, ... }:
 {
   config,
   lib,
@@ -36,8 +35,8 @@ in
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = flake.packages.${pkgs.stdenv.hostPlatform.system}.amatsukaze;
-      defaultText = lib.literalExpression "flake.packages.${pkgs.stdenv.hostPlatform.system}.amatsukaze";
+      default = pkgs.amatsukaze;
+      defaultText = lib.literalExpression "pkgs.amatsukaze";
       description = "実行に使用するAmatsukazeパッケージ。";
     };
 

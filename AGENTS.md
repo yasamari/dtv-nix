@@ -23,7 +23,12 @@ Status at time of writing:
 If these files are later added, treat them as higher priority than this file.
 
 ## 3) Repository Layout
-- `flake.nix`, `flake.lock`: flake inputs/outputs and pinning.
+- `flake.nix`, `flake.lock`: flake inputs/outputs and pinning (`nixpkgs`, `flake-utils`).
+- `overlay.nix`: `overlays.default`; wires all packages via `callPackage`.
+- `packages/<category>/<name>/default.nix`: package derivations and wrappers.
+  Categories: `apps`, `avisynth`, `encoders`, `python`, `ts`, `tuners`.
+- `packages/apps/konomitv/source.nix`: shared KonomiTV version/source helper,
+  reached via a `callPackage` function argument (not an overlay attr).
 - `packages/<name>/default.nix`: package derivations and wrappers.
 - `modules/nixos/*.nix`: NixOS service modules.
 - `modules/nixos/edcb/default.nix`: EDCB module directory form.
@@ -78,14 +83,14 @@ In this repo, a "single test" usually means building one check derivation.
 Portable host-system form:
 ```bash
 SYSTEM="$(nix eval --impure --raw --expr builtins.currentSystem)"
-nix build -L .#checks.${SYSTEM}.pkgs-edcb
+nix build -L .#checks.${SYSTEM}.edcb
 ```
 
 Direct examples:
 ```bash
-nix build -L .#checks.x86_64-linux.pkgs-akebi
-nix build -L .#checks.x86_64-linux.pkgs-konomitv
-nix build -L .#checks.aarch64-linux.pkgs-tsreadex
+nix build -L .#checks.x86_64-linux.akebi
+nix build -L .#checks.x86_64-linux.konomitv
+nix build -L .#checks.aarch64-linux.tsreadex
 ```
 
 ### 4.6 Eval-only quick sanity
@@ -98,8 +103,16 @@ nix eval --raw .#packages.x86_64-linux.edcb.pname
 Conventions below are inferred from existing `packages/` and `modules/nixos/` files.
 
 ### 5.1 Imports and function arguments
-- Prefer argument-set signatures: `{ pkgs, ... }:` or `{ perSystem, pkgs, ... }:`.
-- For modules needing flake attrs, use curried form: `{ flake, ... }:` then `{ config, lib, pkgs, ... }:`.
+- Packages must be callable via `pkgs.callPackage`: declare nixpkgs deps and
+  intra-flake deps as explicit function arguments (for example
+  `{ lib, stdenv, fetchFromGitHub, ... }:`, `{ lib, callPackage, qsvenc ? null, ... }:`);
+  never take a monolithic `pkgs` arg, nor `perSystem` or `flake` args.
+- Wire intra-flake dependencies in `overlay.nix` with `final.callPackage`.
+- Reach internal helper files (for example `../amatsukaze/common.nix`) via a
+  `callPackage` function argument, not via `import ... { inherit pkgs; }`.
+- NixOS modules are plain `{ config, lib, pkgs, ... }:` (no curried `{ flake, ... }:` wrapper).
+- Module default packages come from the overlay: `default = pkgs.<name>;` with
+  `defaultText = lib.literalExpression "pkgs.<name>";`.
 - Keep module argument order stable: `config`, `lib`, `pkgs`, `...`.
 - Define `cfg = config.services.<name>;` near the top of the module `let` block.
 
@@ -115,7 +128,7 @@ Conventions below are inferred from existing `packages/` and `modules/nixos/` fi
 - Always specify explicit types (`bool`, `str`, `path`, `package`, etc.).
 - Use constrained types for ports (`lib.types.ints.between` / `lib.types.ints.port`).
 - Include `default` and clear `description` for each option.
-- Use `defaultText = lib.literalExpression ...` when defaults reference flake attrs.
+- Use `defaultText = lib.literalExpression ...` when defaults reference overlay packages.
 - Gate emitted config with `lib.mkIf cfg.enable`.
 
 ### 5.4 Derivations, dependencies, and pinning
@@ -150,6 +163,8 @@ Conventions below are inferred from existing `packages/` and `modules/nixos/` fi
 - Keep firewall behavior opt-in (`openFirewall = false` default).
 - Gate architecture-specific behavior with `pkgs.stdenv.hostPlatform` checks.
 - Keep x86_64-only encoder wiring explicit and isolated.
+- Select the legacy QSVEnc variant via `.override { qsvenc = pkgs.qsvenc-legacy; }`
+  (for example on `konomitv` / `amatsukaze`); do not add boolean flags for it.
 
 ### 5.8 Metadata conventions
 - Keep `meta` fields consistent: `description`, `homepage`, `license`, `platforms`.

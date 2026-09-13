@@ -1,0 +1,52 @@
+{
+  fetchFromGitHub,
+  dotnetCorePackages,
+  bash,
+}:
+let
+  version = "1.1.0.0";
+
+  src = fetchFromGitHub {
+    owner = "rigaya";
+    repo = "Amatsukaze";
+    tag = version;
+    hash = "sha256-AbkPGUA+itwJKmp6gFsHPlW5wRvqFKDwIPdmtV5xgqE=";
+    fetchSubmodules = true;
+  };
+
+  danmaku2ass = fetchFromGitHub {
+    owner = "m13253";
+    repo = "danmaku2ass";
+    rev = "ced881747670c2eb1c0dbd292c2a567f444b056a";
+    hash = "sha256-yhfioN3/E46vFU1xT68OEM2OymBsB5XI+8WdotD745o=";
+  };
+
+  dotnetSdk = dotnetCorePackages.sdk_10_0;
+  dotnetRuntime = dotnetCorePackages.aspnetcore_10_0;
+
+  mesonVersionPatch = ''
+    substituteInPlace meson.build \
+      --replace-fail 'version_full=$(git describe --tags) && \' 'version_full="${version}" && \' \
+      --replace-fail 'version_short=$(git describe --abbrev=0 --tags) && \' 'version_short="${version}" && \'
+  '';
+
+  dotnetVersionPatch = ''
+    substituteInPlace AmatsukazeServer/Version.sh \
+      --replace-fail '/bin/bash' '${bash}/bin/bash' \
+      --replace-fail 'VER=$(git describe --tags)' 'VER="${version}"'
+    substituteInPlace AmatsukazeServer/Properties/AssemblyInfo.tt \
+      --replace-fail 'AssemblyVersion("0.0.0.0")' 'AssemblyVersion("@SHORTVERSION@")'
+    (cd AmatsukazeServer && ./Version.sh)
+  '';
+in
+{
+  inherit
+    version
+    src
+    danmaku2ass
+    dotnetSdk
+    dotnetRuntime
+    mesonVersionPatch
+    dotnetVersionPatch
+    ;
+}
