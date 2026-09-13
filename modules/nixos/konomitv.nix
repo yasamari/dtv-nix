@@ -1,3 +1,4 @@
+{ self }:
 {
   config,
   lib,
@@ -7,6 +8,7 @@
 let
   cfg = config.services.konomitv;
 
+  system = pkgs.stdenv.hostPlatform.system;
   stateDir = "/var/lib/konomitv";
   defaultUser = "konomitv";
   defaultGroup = "konomitv";
@@ -46,8 +48,8 @@ in
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = pkgs.konomitv;
-      defaultText = lib.literalExpression "pkgs.konomitv";
+      default = self.packages.${system}.konomitv;
+      defaultText = lib.literalExpression "self.packages.${system}.konomitv";
       description = "実行に使用する KonomiTV パッケージ。";
     };
 

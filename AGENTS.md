@@ -120,9 +120,11 @@ Conventions below are inferred from existing `packages/` and `modules/nixos/` fi
 - Wire intra-flake dependencies in `overlay.nix` with `final.callPackage`.
 - Reach internal helper files (for example `../amatsukaze/common.nix`) via a
   `callPackage` function argument, not via `import ... { inherit pkgs; }`.
-- NixOS modules are plain `{ config, lib, pkgs, ... }:` (no curried `{ flake, ... }:` wrapper).
-- Module default packages come from the overlay: `default = pkgs.<name>;` with
-  `defaultText = lib.literalExpression "pkgs.<name>";`.
+- NixOS modules accept an optional `{ self }:` closure argument before the standard
+  `{ config, lib, pkgs, ... }:` to access `self.packages`/`self.nixosModules` from the
+  same flake. When present, module defaults use `self.packages.${system}.<name>` and
+  `defaultText = lib.literalExpression "self.packages.${system}.<name>";`.
+  When absent, the overlay `pkgs.<name>` is used as fallback.
 - Keep module argument order stable: `config`, `lib`, `pkgs`, `...`.
 - Define `cfg = config.services.<name>;` near the top of the module `let` block.
 

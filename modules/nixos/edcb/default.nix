@@ -1,3 +1,4 @@
+{ self }:
 {
   config,
   lib,
@@ -7,6 +8,7 @@
 let
   cfg = config.services.edcb;
 
+  system = pkgs.stdenv.hostPlatform.system;
   stateDir = "/var/lib/edcb";
   defaultUser = "edcb";
   defaultGroup = "edcb";
@@ -49,7 +51,7 @@ let
     '') edcbLibs
   );
 
-  bonDriver = pkgs.bondriver_linuxmirakc;
+  bonDriver = self.packages.${system}.bondriver_linuxmirakc;
 
   generateBonDriverIni =
     priority:
@@ -132,8 +134,8 @@ in
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = pkgs.edcb;
-      defaultText = lib.literalExpression "pkgs.edcb";
+      default = self.packages.${system}.edcb;
+      defaultText = lib.literalExpression "self.packages.${system}.edcb";
       description = "実行に使用する EDCB パッケージ。";
     };
 

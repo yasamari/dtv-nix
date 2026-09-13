@@ -1,11 +1,14 @@
+{ self }:
 {
   config,
-  pkgs,
   lib,
+  pkgs,
   ...
 }:
 let
   cfg = config.hardware.px4;
+
+  system = pkgs.stdenv.hostPlatform.system;
 
   px4_drv = cfg.package.override {
     kernel = config.boot.kernelPackages.kernel;
@@ -17,22 +20,22 @@ in
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = pkgs.px4_drv;
-      defaultText = lib.literalExpression "pkgs.px4_drv";
+      default = self.packages.${system}.px4_drv;
+      defaultText = lib.literalExpression "self.packages.${system}.px4_drv";
       description = "使用するpx4_drvパッケージ。";
     };
 
     it930xFirmwarePackage = lib.mkOption {
       type = lib.types.package;
-      default = pkgs.it930x-firmware;
-      defaultText = lib.literalExpression "pkgs.it930x-firmware";
+      default = self.packages.${system}.it930x-firmware;
+      defaultText = lib.literalExpression "self.packages.${system}.it930x-firmware";
       description = "使用するit930x-firmwareパッケージ。";
     };
 
     ifdPx4Package = lib.mkOption {
       type = lib.types.package;
-      default = pkgs.ifd-px4;
-      defaultText = lib.literalExpression "pkgs.ifd-px4";
+      default = self.packages.${system}.ifd-px4;
+      defaultText = lib.literalExpression "self.packages.${system}.ifd-px4";
       description = "使用するifd-px4パッケージ。";
     };
 

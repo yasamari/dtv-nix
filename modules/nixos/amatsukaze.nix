@@ -1,3 +1,4 @@
+{ self }:
 {
   config,
   lib,
@@ -7,6 +8,7 @@
 let
   cfg = config.services.amatsukaze;
 
+  system = pkgs.stdenv.hostPlatform.system;
   stateDir = "/var/lib/amatsukaze";
   defaultUser = "amatsukaze";
   defaultGroup = "amatsukaze";
@@ -35,8 +37,8 @@ in
 
     package = lib.mkOption {
       type = lib.types.package;
-      default = pkgs.amatsukaze;
-      defaultText = lib.literalExpression "pkgs.amatsukaze";
+      default = self.packages.${system}.amatsukaze;
+      defaultText = lib.literalExpression "self.packages.${system}.amatsukaze";
       description = "実行に使用するAmatsukazeパッケージ。";
     };
 

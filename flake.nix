@@ -35,12 +35,12 @@
       overlays.default = import ./overlay.nix;
 
       nixosModules = {
-        amatsukaze = import ./modules/nixos/amatsukaze.nix;
-        edcb = import ./modules/nixos/edcb;
-        konomitv = import ./modules/nixos/konomitv.nix;
-        px4 = import ./modules/nixos/px4.nix;
-        dtv = import ./modules/nixos/dtv.nix;
-        default = import ./modules/nixos/dtv.nix;
+        amatsukaze = import ./modules/nixos/amatsukaze.nix { inherit self; };
+        edcb = import ./modules/nixos/edcb { inherit self; };
+        konomitv = import ./modules/nixos/konomitv.nix { inherit self; };
+        px4 = import ./modules/nixos/px4.nix { inherit self; };
+        dtv = import ./modules/nixos/dtv.nix { inherit self; };
+        default = self.nixosModules.dtv;
       };
     };
 }
