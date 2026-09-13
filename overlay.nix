@@ -1,8 +1,4 @@
-final: prev:
-let
-  isx86_64 = final.stdenv.hostPlatform.isx86_64;
-in
-{
+final: prev: {
   # apps
   akebi = final.callPackage ./packages/apps/akebi { };
   amatsukaze-add-task = final.callPackage ./packages/apps/amatsukaze-add-task { };
@@ -11,10 +7,7 @@ in
   edcb = final.callPackage ./packages/apps/edcb { };
   isdbscanner = final.callPackage ./packages/apps/isdbscanner { };
   join_logo_scp = final.callPackage ./packages/apps/join_logo_scp { };
-  konomitv = final.callPackage ./packages/apps/konomitv {
-    qsvenc = if isx86_64 then final.qsvenc else null;
-    nvenc = if isx86_64 then final.nvenc else null;
-  };
+  konomitv = final.callPackage ./packages/apps/konomitv { };
   konomitv-client = final.callPackage ./packages/apps/konomitv-client { };
   mirakurun = final.callPackage ./packages/apps/mirakurun { };
   recisdb = final.callPackage ./packages/apps/recisdb { };

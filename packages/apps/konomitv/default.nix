@@ -1,5 +1,6 @@
 {
   lib,
+  stdenv,
   callPackage,
   python3,
   opencv,
@@ -9,8 +10,8 @@
   tsreadex,
   psisiarc,
   psisimux,
-  qsvenc ? null,
-  nvenc ? null,
+  qsvenc,
+  nvenc,
   asyncio-atexit,
   hashids,
   grapheme,
@@ -75,8 +76,10 @@ let
     py.websockets
   ];
 
-  qsvenccPath = if qsvenc != null then "${qsvenc}/bin/qsvencc" else "";
-  nvenccPath = if nvenc != null then "${nvenc}/bin/nvencc" else "";
+  # QSVEnc/NVEnc are x86_64-only; never touch them on other systems so that
+  # merely evaluating this package does not pull in unsupported derivations.
+  qsvenccPath = if stdenv.hostPlatform.isx86_64 then "${qsvenc}/bin/qsvencc" else "";
+  nvenccPath = if stdenv.hostPlatform.isx86_64 then "${nvenc}/bin/nvencc" else "";
 in
 py.buildPythonApplication rec {
   pname = "konomitv";
