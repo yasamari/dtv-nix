@@ -2,6 +2,7 @@
   lib,
   callPackage,
   buildDotnetModule,
+  makeWrapper,
   ...
 }:
 let
@@ -23,12 +24,19 @@ buildDotnetModule {
 
   dontDotnetFixup = true;
 
+  nativeBuildInputs = [ makeWrapper ];
+
   postPatch = common.dotnetVersionPatch;
 
   dotnetBuildFlags = [
     "-p:ContinuousIntegrationBuild=true"
     "-p:Deterministic=true"
   ];
+
+  postInstall = ''
+    makeWrapper "$out/lib/amatsukaze-add-task/AmatsukazeAddTask" "$out/bin/AmatsukazeAddTask" \
+      --set DOTNET_ROOT "${common.dotnetRuntime}/share/dotnet"
+  '';
 
   meta = with lib; {
     description = "Task addition utility for Amatsukaze";
