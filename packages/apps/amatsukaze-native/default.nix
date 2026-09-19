@@ -44,12 +44,8 @@ stdenv.mkDerivation {
 
   postPatch = mesonVersionPatch + ''
     substituteInPlace Amatsukaze/AmatsukazeCLI.hpp \
-      --replace-fail 'conf.nicoConvChSidPath = pathGetDirectory(conf.nicoConvAssPath) + _T("/ch_sid.txt");' \
-                     'tstring nicoConvDir = pathGetDirectory(conf.nicoConvAssPath); conf.nicoConvChSidPath = nicoConvDir.empty() ? moduleDir + _T("/ch_sid.txt") : nicoConvDir + _T("/ch_sid.txt");'
-
-    substituteInPlace Amatsukaze/NicoJK.cpp \
-      --replace-fail 'return StringFormat(_T("python3 \"%s\" --channel jk%d --starttime %lld --endtime %lld --width %d --height %d --output \"%s\""),' \
-                     'return StringFormat(_T("%s --channel jk%d --starttime %lld --endtime %lld --width %d --height %d --output \"%s\""),'
+      --replace-fail 'conf.nicoConvChSidPath = pathGetDirectory(nicoJKToolPath) + _T("/ch_sid.txt");' \
+                     'tstring nicoConvDir = pathGetDirectory(nicoJKToolPath); conf.nicoConvChSidPath = nicoConvDir.empty() ? moduleDir + _T("/ch_sid.txt") : nicoConvDir + _T("/ch_sid.txt");'
   '';
 
   configurePhase = ''
