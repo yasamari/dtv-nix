@@ -36,6 +36,7 @@
   rgtools,
   yadifmod2,
   tivtc,
+  nix-update-script,
   ...
 }:
 let
@@ -167,6 +168,15 @@ stdenv.mkDerivation {
 
     runHook postInstall
   '';
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--flake"
+      "--version=stable"
+      "--override-filename"
+      "packages/apps/amatsukaze/common.nix"
+    ];
+  };
 
   meta = with lib; {
     description = "Linux build of Amatsukaze server and CLI tools";
