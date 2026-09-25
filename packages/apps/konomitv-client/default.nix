@@ -37,7 +37,7 @@ stdenv.mkDerivation rec {
 
   yarnOfflineCache = fetchYarnDeps {
     yarnLock = konomitvSrc + "/client/yarn.lock";
-    hash = "sha256-CpVjG1ZVzsbantWgKs8KAxWXoMe5e11FBcVS+kP67gA=";
+    hash = "sha256-HATBA4MqKrSzQ8gs7rf/QWCgqo4AJZrj501dFGW81Cw=";
   };
 
   installPhase = ''

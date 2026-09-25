@@ -22,6 +22,7 @@
   aerich,
   zendriver,
   atproto,
+  nix-update-script,
   ...
 }:
 let
@@ -236,6 +237,15 @@ py.buildPythonApplication rec {
   makeWrapperArgs = [
     ''--prefix PATH : "${chromium}/bin"''
   ];
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--flake"
+      "--version=branch=master"
+      "--override-filename"
+      "packages/apps/konomitv/source.nix"
+    ];
+  };
 
   meta = with lib; {
     description = "Modern Japanese TV media server";
