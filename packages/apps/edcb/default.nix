@@ -10,6 +10,7 @@
   libcap,
   libiconv,
   gnused,
+  nix-update-script,
   ...
 }:
 let
@@ -17,13 +18,13 @@ let
 in
 stdenv.mkDerivation rec {
   pname = "edcb";
-  version = "0-unstable-2026-09-05";
+  version = "0-unstable-2026-09-21";
 
   src = fetchFromGitHub {
     owner = "tkntrec";
     repo = "EDCB";
-    rev = "84da43e95dcb905b9f641056ed489743de6dba4d";
-    hash = "sha256-Lh0xs/c4rXadZA2Xp+2fSsZrlV6VWkcSa43QFjtsmvI=";
+    rev = "622a1d3a456d6e8df37a966976ed93c605fa26b9";
+    hash = "sha256-+jCkAwfPFRTqqJKfnOvADwNq2AMzNJuvVRQxcwP6qo4=";
   };
 
   strictDeps = true;
@@ -94,6 +95,13 @@ stdenv.mkDerivation rec {
 
     runHook postInstall
   '';
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--flake"
+      "--version=branch=my-build"
+    ];
+  };
 
   meta = with lib; {
     description = "Linux build of EDCB (EpgTimerSrv + plugins)";
