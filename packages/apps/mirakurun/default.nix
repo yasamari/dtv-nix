@@ -12,16 +12,16 @@
 }:
 buildNpmPackage rec {
   pname = "mirakurun";
-  version = "4.1.3-unstable-2026-06-27";
+  version = "4.1.5-unstable-2026-09-26";
 
   src = fetchFromGitHub {
     owner = "Chinachu";
     repo = "Mirakurun";
-    rev = "5770073e9b30d523512858ca82f45386f51a08fd";
-    hash = "sha256-LkZuuWchGYK6CZJ5SPbPf5Xc02Dp77Nb/D2eexVY8Cg=";
+    rev = "563a9e703061866c38847f4e5395447afa51ca72";
+    hash = "sha256-wrryvWmI3ScqVDYEnDxec4waxu0ClwMEJvV7cD42MvA=";
   };
 
-  npmDepsHash = "sha256-0eHTvJ57LF593XKHSqmF9FBuUtyHTeP+NgTvcms1GaY=";
+  npmDepsHash = "sha256-SfdaOaQftZ76K0f+0FvgVE7+vKpQdHdyeB8jl8qVkE8=";
 
   nativeBuildInputs = [
     dos2unix
