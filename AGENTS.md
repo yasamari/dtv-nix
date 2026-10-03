@@ -176,6 +176,7 @@ Conventions below are inferred from existing `packages/` and `modules/nixos/` fi
 - Gate architecture-specific behavior with a `stdenv` argument
   (`stdenv.hostPlatform.isx86_64`) inside the package, not in `overlay.nix`.
 - Keep x86_64-only encoder wiring explicit and isolated.
+- Select the legacy QSVEnc variant via `.override { qsvenc = pkgs.qsvenc-legacy; }`
   (for example on `konomitv` / `amatsukaze`); do not add boolean flags for it.
 
 ### 5.8 Metadata conventions

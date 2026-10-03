@@ -17,6 +17,9 @@
           inherit system;
           config = {
             allowUnfree = true;
+            permittedInsecurePackages = [
+              "intel-media-sdk-23.2.2"
+            ];
           };
           overlays = [ self.overlays.default ];
         };

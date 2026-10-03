@@ -43,14 +43,24 @@
   glib,
   libsysprof-capture,
   pcre2,
+  libvpl,
   opencl-headers,
   ocl-icd,
   libx11,
   libdovi,
   hdr10plus,
   intel-media-driver,
+  intel-media-sdk,
+  vpl-gpu-rt,
   intel-compute-runtime,
+  cmrt,
+  useLegacyIntel ? false,
 }:
+let
+  intelMediaRuntime = if useLegacyIntel then intel-media-sdk else vpl-gpu-rt;
+
+  intelComputeRuntime = intel-compute-runtime;
+in
 stdenv.mkDerivation rec {
   pname = "qsvenc";
   version = "8.32";
@@ -88,6 +98,7 @@ stdenv.mkDerivation rec {
     glib
     libsysprof-capture
     pcre2
+    libvpl
     opencl-headers
     ocl-icd
     libx11
@@ -96,7 +107,9 @@ stdenv.mkDerivation rec {
 
     # intel
     intel-media-driver
-    intel-compute-runtime
+    intelMediaRuntime
+    intelComputeRuntime
+    cmrt
   ];
 
   postPatch = ''
@@ -136,7 +149,8 @@ stdenv.mkDerivation rec {
       --prefix LD_LIBRARY_PATH : "${
         lib.makeLibraryPath [
           intel-media-driver
-          intel-compute-runtime
+          intelMediaRuntime
+          intelComputeRuntime
           libva
           libdrm
           ocl-icd
@@ -144,7 +158,7 @@ stdenv.mkDerivation rec {
       }" \
       --set LIBVA_DRIVER_NAME iHD \
       --prefix LIBVA_DRIVERS_PATH : "${intel-media-driver}/lib/dri" \
-      --prefix OCL_ICD_VENDORS : "${intel-compute-runtime}/etc/OpenCL/vendors"
+      --prefix OCL_ICD_VENDORS : "${intelComputeRuntime}/etc/OpenCL/vendors"
 
     runHook postInstall
   '';
