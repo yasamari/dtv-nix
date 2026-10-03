@@ -31,7 +31,6 @@ final: prev: {
   # encoders
   nvenc = final.callPackage ./packages/encoders/nvenc { };
   qsvenc = final.callPackage ./packages/encoders/qsvenc { };
-  qsvenc-legacy = final.callPackage ./packages/encoders/qsvenc-legacy { };
 
   # python (KonomiTV dependencies, usable standalone)
   aerich = final.callPackage ./packages/python/aerich { };
