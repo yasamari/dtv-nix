@@ -33,17 +33,8 @@ final: prev: {
   qsvenc = final.callPackage ./packages/encoders/qsvenc { };
   qsvenc-legacy = final.callPackage ./packages/encoders/qsvenc-legacy { };
 
-  # python (KonomiTV dependencies, usable standalone)
-  aerich = final.callPackage ./packages/python/aerich { };
+  # python (KonomiTV dependencies resolved via uv2nix; usable standalone)
   ariblib = final.callPackage ./packages/python/ariblib { };
-  asyncio-atexit = final.callPackage ./packages/python/asyncio-atexit { };
-  atproto = final.callPackage ./packages/python/atproto { };
-  biim = final.callPackage ./packages/python/biim { };
-  grapheme = final.callPackage ./packages/python/grapheme { };
-  hashids = final.callPackage ./packages/python/hashids { };
-  pypika-tortoise = final.callPackage ./packages/python/pypika-tortoise { };
-  tortoise-orm = final.callPackage ./packages/python/tortoise-orm { };
-  zendriver = final.callPackage ./packages/python/zendriver { };
 
   # ts
   b24tovtt = final.callPackage ./packages/ts/b24tovtt { };

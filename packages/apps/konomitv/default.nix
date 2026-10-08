@@ -2,7 +2,10 @@
   lib,
   stdenv,
   callPackage,
-  python3,
+  python313,
+  uv2nix,
+  pyproject-nix,
+  pyproject-build-systems,
   opencv,
   ffmpeg,
   chromium,
@@ -10,72 +13,19 @@
   tsreadex,
   psisiarc,
   psisimux,
+  makeWrapper,
+  runCommand,
   qsvenc ? null,
   nvenc ? null,
-  asyncio-atexit,
-  hashids,
-  grapheme,
-  ariblib,
-  biim,
-  pypika-tortoise,
-  tortoise-orm,
-  aerich,
-  zendriver,
-  atproto,
   nix-update-script,
   ...
 }:
 let
   inherit (callPackage ./source.nix { }) version konomitvSrc;
 
-  python = python3;
-  py = python.pkgs;
+  python = python313;
 
   clientBundle = callPackage ../konomitv-client { };
-
-  dependencies = [
-    aerich
-    ariblib
-    biim
-    hashids
-    tortoise-orm
-    zendriver
-    atproto
-    py.aiofiles
-    py.aiohttp
-    py.av
-    py.bcrypt
-    py.beautifulsoup4
-    py.colorama
-    py.cryptography
-    py.elevate
-    py.fastapi
-    py.h2
-    py.httpx
-    py.httptools
-    py."opencv-python-headless"
-    py.passlib
-    py.pillow
-    py.ping3
-    py.psutil
-    py.puremagic
-    py.py7zr
-    py.pydantic
-    py."python-jose"
-    py."python-multipart"
-    py.requests
-    py.rich
-    py."ruamel-yaml"
-    py."sse-starlette"
-    py.typer
-    py."typing-extensions"
-    py."typing-inspect"
-    py.tzdata
-    py.uvicorn
-    py.uvloop
-    py.watchfiles
-    py.websockets
-  ];
 
   # QSVEnc/NVEnc are x86_64-only; never touch them on other systems so that
   # merely evaluating this package does not pull in unsupported derivations.
@@ -97,53 +47,11 @@ let
       "${nvenc}/bin/nvencc"
     else
       "";
-in
-py.buildPythonApplication rec {
-  pname = "konomitv";
-  inherit version;
 
-  sourceRoot = "source/server";
-  format = "pyproject";
-
-  src = konomitvSrc;
-
-  propagatedBuildInputs = dependencies;
-
-  nativeBuildInputs = [ py.poetry-core ];
-
-  pythonRelaxDeps = [
-    "aiofiles"
-    "atproto"
-    "av"
-    "bcrypt"
-    "fastapi"
-    "pillow"
-    "ping3"
-    "psutil"
-    "py7zr"
-    "rich"
-    "ruamel-yaml"
-    "sse-starlette"
-    "tzdata"
-  ];
-
-  pythonRemoveDeps = [ "taskipy" ];
-
-  postPatch = ''
-    substituteInPlace pyproject.toml \
-      --replace-fail 'package-mode = false' $'package-mode = true\npackages = [{ include = "app" }]\n'
-
-    cat >> pyproject.toml <<'EOF'
-
-    [tool.poetry.scripts]
-    konomitv = "KonomiTV:cli"
-    EOF
-
-    substituteInPlace pyproject.toml \
-      --replace-fail '"ruamel.yaml" = "==0.18.12"' '"ruamel.yaml" = ">=0.18.12,<0.20.0"'
-
-    # アーキテクチャとサードパーティーライブラリのチェックに失敗しても動作するようにする。
-    substituteInPlace KonomiTV.py --replace-fail "sys.exit(1)" ""
+  patchedSrc = runCommand "konomitv-src-patched" { } ''
+    cp -r ${konomitvSrc} source
+    chmod -R u+w source
+    (cd source/server && {
 
     # パスの解決に失敗している箇所を修正する。
     substituteInPlace KonomiTV.py \
@@ -151,6 +59,9 @@ py.buildPythonApplication rec {
     substituteInPlace app/constants.py \
       --replace-fail "path=['app/models']" \
       "path=[str(Path(__file__).resolve().parent / 'models')]"
+
+    # アーキテクチャとサードパーティーライブラリのチェックに失敗しても動作するようにする。
+    substituteInPlace KonomiTV.py --replace-fail "sys.exit(1)" ""
 
     # OpenCV のカスケード分類器のパスを修正する。
     substituteInPlace app/metadata/ThumbnailGenerator.py \
@@ -175,8 +86,8 @@ py.buildPythonApplication rec {
       "CLIENT_DIR = Path('${clientBundle}')" \
       --replace-fail \
       "STATIC_DIR = BASE_DIR / 'static'" \
-      "STATIC_DIR = Path('${src}/server/static')"
-      
+      "STATIC_DIR = Path('${konomitvSrc}/server/static')"
+
     # データとログのディレクトリを環境変数で指定できるように変更し、存在しない場合は作成するようにする。
     substituteInPlace app/constants.py \
       --replace-fail \
@@ -224,19 +135,63 @@ py.buildPythonApplication rec {
       --replace-fail \
       "str(LIBRARY_DIR / 'rkmppenc/rkmppenc') + LIBRARY_EXTENSION" \
       "os.getenv('KONOMITV_RKMPPENC_PATH', str(Path.cwd() / 'thirdparty/rkmppenc.elf'))"
+
+    })
+
+    mv source $out
   '';
 
-  postInstall = ''
-    install -Dm644 ../config.example.yaml "$out/share/konomitv/config.example.yaml"
-    install -Dm644 ../License.txt "$out/share/konomitv/License.txt"
-    install -Dm644 ${./config.yaml} "$out/share/konomitv/config.yaml"
+  workspace = uv2nix.lib.workspace.loadWorkspace {
+    workspaceRoot = "${patchedSrc}/server";
+  };
 
-    install -Dm644 KonomiTV.py "$out/${python.sitePackages}/KonomiTV.py"
+  overlay = workspace.mkPyprojectOverlay {
+    sourcePreference = "wheel";
+  };
+
+  pythonSet = (callPackage pyproject-nix.build.packages { inherit python; }).overrideScope (
+    lib.composeManyExtensions [
+      pyproject-build-systems.overlays.wheel
+      overlay
+      # sdist-only packages that fail to declare their build requirements
+      (final: prev: {
+        elevate = prev.elevate.overrideAttrs (old: {
+          nativeBuildInputs = old.nativeBuildInputs ++ final.resolveBuildSystem { setuptools = [ ]; };
+        });
+        grapheme = prev.grapheme.overrideAttrs (old: {
+          nativeBuildInputs = old.nativeBuildInputs ++ final.resolveBuildSystem { setuptools = [ ]; };
+        });
+      })
+    ]
+  );
+
+  venv = pythonSet.mkVirtualEnv "konomitv-${version}" workspace.deps.default;
+in
+stdenv.mkDerivation {
+  pname = "konomitv";
+  inherit version;
+
+  dontUnpack = true;
+
+  nativeBuildInputs = [ makeWrapper ];
+
+  installPhase = ''
+    runHook preInstall
+
+    mkdir -p $out/bin $out/share/konomitv
+    cp -r ${patchedSrc}/server $out/share/konomitv/server
+    install -Dm644 ${konomitvSrc}/config.example.yaml $out/share/konomitv/config.example.yaml
+    install -Dm644 ${konomitvSrc}/License.txt $out/share/konomitv/License.txt
+    install -Dm644 ${./config.yaml} $out/share/konomitv/config.yaml
+
+    makeWrapper ${venv}/bin/python $out/bin/konomitv \
+      --add-flags "$out/share/konomitv/server/KonomiTV.py" \
+      --prefix PATH : "${chromium}/bin"
+
+    runHook postInstall
   '';
 
-  makeWrapperArgs = [
-    ''--prefix PATH : "${chromium}/bin"''
-  ];
+  strictDeps = true;
 
   passthru.updateScript = nix-update-script {
     extraArgs = [
