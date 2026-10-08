@@ -63,7 +63,7 @@ let
 in
 stdenv.mkDerivation rec {
   pname = "qsvenc";
-  version = "8.32";
+  version = "8.33";
 
   hardeningDisable = [ "all" ];
 
@@ -71,7 +71,7 @@ stdenv.mkDerivation rec {
     owner = "rigaya";
     repo = "QSVEnc";
     tag = version;
-    hash = "sha256-k4UXETeBEFn9LEiFsDVkC8EWaFYYWZibjjLQDSXnEzo=";
+    hash = "sha256-ACU0hARBeh/l7YUUUjwJ8UbxOZq5u26LVpu8WUdW/xk=";
     fetchSubmodules = true;
   };
 
