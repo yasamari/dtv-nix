@@ -10,13 +10,13 @@
 }:
 stdenv.mkDerivation rec {
   pname = "tsreplace";
-  version = "0.20";
+  version = "0.21";
 
   src = fetchFromGitHub {
     owner = "rigaya";
     repo = "tsreplace";
     tag = version;
-    hash = "sha256-EZs5Ly7XpAJ3dGAaJcuc3rzbT6q0iD1mzxaFTu0wgAk=";
+    hash = "sha256-Uz2jK8iLJ6+m5d/MeeHfiXKzFc9gcuOl3ThOVu1dvIo=";
   };
 
   nativeBuildInputs = [
