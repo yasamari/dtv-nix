@@ -9,7 +9,7 @@
   libjpeg_turbo,
   openssl,
   zlib,
-  ffmpeg,
+  ffmpeg_6,
   avisynthplus-cuda,
 }:
 let
@@ -35,7 +35,7 @@ stdenv.mkDerivation {
   ];
 
   buildInputs = [
-    ffmpeg
+    ffmpeg_6
     libjpeg_turbo
     openssl
     zlib
