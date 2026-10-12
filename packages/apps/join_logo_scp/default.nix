@@ -2,20 +2,25 @@
   lib,
   stdenv,
   fetchFromGitHub,
+  glibc,
+  nix-update-script,
   ...
 }:
 stdenv.mkDerivation rec {
   pname = "join_logo_scp";
-  version = "4.1.0_Linux";
+  version = "5.1.1_Linux";
 
   src = fetchFromGitHub {
     owner = "tobitti0";
     repo = "join_logo_scp";
-    rev = "Ver${version}";
-    hash = "sha256-rPFI4Tt2MkRQHyLjMAvLBxB1Ap1ocIczW0JDCdzYMig=";
+    rev = "4dce4aa71efb7b55764f8dbd2277e5e45df331dd";
+    hash = "sha256-c8sscFx88l8P8oDf0l6MjZNipHxbRUANsFx9rH5TNos=";
   };
 
   sourceRoot = "source/src";
+
+  # Upstream makefile links with -static; glibc.static provides libc.a/libm.a.
+  buildInputs = [ glibc.static ];
 
   buildPhase = ''
     runHook preBuild
@@ -34,6 +39,13 @@ stdenv.mkDerivation rec {
 
     runHook postInstall
   '';
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--flake"
+      "--version=branch=master"
+    ];
+  };
 
   meta = with lib; {
     description = "JoinLogoScp command line tool and JL scripts";

@@ -4,13 +4,13 @@
   bash,
 }:
 let
-  version = "1.1.1.0";
+  version = "1.1.1.1";
 
   src = fetchFromGitHub {
     owner = "rigaya";
     repo = "Amatsukaze";
     tag = version;
-    hash = "sha256-SwdUOUYQI6XXikHYnNJXb7IDr6lrOd2DuQ7V0qRg/uY=";
+    hash = "sha256-nKBIeKLNql/Ngr4GlTiSVGwih9kd2DrYDQO0st8FE+U=";
     fetchSubmodules = true;
   };
 

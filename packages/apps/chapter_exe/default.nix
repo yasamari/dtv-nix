@@ -8,21 +8,16 @@
 }:
 stdenv.mkDerivation {
   pname = "chapter_exe";
-  version = "unstable-2025-10-18";
+  version = "mod4-unstable-2026-08-11";
 
   nativeBuildInputs = [ makeWrapper ];
 
   src = fetchFromGitHub {
     owner = "tobitti0";
     repo = "chapter_exe";
-    rev = "d74f65ffa6c08066425a1aaa6464f6936ff7254b";
-    hash = "sha256-gUXnvB+gTOoshmCQ0rH7n2NhFIXa4jE9V8OHI+b7c14=";
+    rev = "266ff66f1052a684552a0a3e962b4b796862b8ac";
+    hash = "sha256-iSnKI65q9zItEeWM+0wzcBwsOqcl1akQKbjwkCbFnlU=";
   };
-
-  postPatch = ''
-    substituteInPlace src/Makefile \
-      --replace-fail '-I../avisynth -I../extras' '-I../avisynth -I../extras -I${avisynthplus.dev}/include/avisynth'
-  '';
 
   buildPhase = ''
     runHook preBuild

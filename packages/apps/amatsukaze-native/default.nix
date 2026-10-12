@@ -11,6 +11,9 @@
   zlib,
   ffmpeg_6,
   avisynthplus-cuda,
+  libaribcaption,
+  fontconfig,
+  freetype,
 }:
 let
   avisynthplusCuda = avisynthplus-cuda;
@@ -40,9 +43,16 @@ stdenv.mkDerivation {
     openssl
     zlib
     avisynthplusCuda
+    libaribcaption
+    fontconfig.dev
+    freetype.dev
   ];
 
   postPatch = mesonVersionPatch + ''
+    # Upstream 1.1.1.1 links libaribcaption/fontconfig/zlib statically on Linux.
+    # Nixpkgs ships shared libraries only; the runtime closure provides them.
+    substituteInPlace meson.build \
+      --replace-fail 'static : true' 'static : false'
     substituteInPlace Amatsukaze/AmatsukazeCLI.hpp \
       --replace-fail 'conf.nicoConvChSidPath = pathGetDirectory(nicoJKToolPath) + _T("/ch_sid.txt");' \
                      'tstring nicoConvDir = pathGetDirectory(nicoJKToolPath); conf.nicoConvChSidPath = nicoConvDir.empty() ? moduleDir + _T("/ch_sid.txt") : nicoConvDir + _T("/ch_sid.txt");'

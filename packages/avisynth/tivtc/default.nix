@@ -5,15 +5,15 @@
   cmake,
   ...
 }:
-stdenv.mkDerivation {
+stdenv.mkDerivation rec {
   pname = "tivtc";
-  version = "1.0.31";
+  version = "1.0.32";
 
   src = fetchFromGitHub {
     owner = "pinterf";
     repo = "TIVTC";
-    rev = "2756efd1c337c64d40cfa14aa9ee65599bb41e9f";
-    hash = "sha256-bNBOCqz7+yE6U35Gpvx/awmKY+itCX4h3eoTeq70iKg=";
+    tag = "v${version}";
+    hash = "sha256-CFUkJNUv5bJAt31btjE3A221tAR82bjTJBkI0M83+CA=";
   };
 
   nativeBuildInputs = [ cmake ];

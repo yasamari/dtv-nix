@@ -10,13 +10,13 @@
 }:
 stdenv.mkDerivation {
   pname = "nnedi3";
-  version = "avsp-unstable-2026-08-02";
+  version = "0.9.4.51-unstable-2026-09-20";
 
   src = fetchFromGitHub {
     owner = "rigaya";
     repo = "NNEDI3";
-    rev = "baa68b771e52e6daf8820531b5172253d4a504ac";
-    hash = "sha256-RL/ygwd8DGr+t10CMp5uyksmyO+2ntZx+IJm4UQ6Ysk=";
+    rev = "a09c8e743ac42c7552bdf2514605e7e0253da0b6";
+    hash = "sha256-MZFOMf5B7gPNGTZgtpTrBuHgk+OqHZhbVRCKwXrvtTc=";
   };
 
   nativeBuildInputs = [

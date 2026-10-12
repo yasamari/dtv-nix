@@ -7,13 +7,13 @@
 }:
 stdenvNoCC.mkDerivation rec {
   pname = "edcb-material-webui";
-  version = "0-unstable-2026-09-22";
+  version = "0-unstable-2026-10-08";
 
   src = fetchFromGitHub {
     owner = "EMWUI";
     repo = "EDCB_Material_WebUI";
-    rev = "aa938f0ee5819bd00a65235316f19e463d14aa22";
-    hash = "sha256-Evm4Pj+5BaoQ+hjECBAt2Ftr5+umThpN0dtxZqUoamY=";
+    rev = "0eb88e3a38b4ba2bfb2df0accab66dc08daa0b6d";
+    hash = "sha256-W88pW5ikD2PF9rf/JvMuFJeh5QrCFf6h/gdBIl6tjwk=";
   };
 
   dontConfigure = true;
