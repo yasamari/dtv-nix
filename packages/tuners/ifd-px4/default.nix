@@ -47,7 +47,7 @@ stdenv.mkDerivation {
 
   meta = with lib; {
     description = "PC/SC IFD handler for the px4_drv smart card reader";
-    homepage = "https://github.com/yyya-nico/px4_drv/tree/develop/userland/ifd-px4";
+    homepage = "https://github.com/yyya-nico/px4_drv/tree/v0.6.11/userland/ifd-px4";
     license = licenses.gpl2Only;
     platforms = platforms.linux;
     maintainers = [ ];
