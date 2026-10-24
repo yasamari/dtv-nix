@@ -15,6 +15,7 @@ py.buildPythonApplication rec {
   pname = "isdb-scanner";
   version = "1.3.3";
   pyproject = true;
+  __structuredAttrs = false;
 
   src = fetchFromGitHub {
     owner = "tsukumijima";
