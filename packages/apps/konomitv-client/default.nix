@@ -31,13 +31,9 @@ stdenv.mkDerivation rec {
     yarnBuildHook
   ];
 
-  postPatch = ''
-    substituteInPlace package.json --replace-fail '"node": "^20.16.0"' '"node": "^22.0.0"'
-  '';
-
   yarnOfflineCache = fetchYarnDeps {
     yarnLock = konomitvSrc + "/client/yarn.lock";
-    hash = "sha256-1viKBDq805CZDjpFaW4M32gvTdXXWgXzpO7HLWMNGpc=";
+    hash = "sha256-wj9/e0lond6Jq7GGJ7R+DrSaQm9QYwP2i45LdHtz0mU=";
   };
 
   installPhase = ''
