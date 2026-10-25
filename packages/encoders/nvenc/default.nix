@@ -60,6 +60,7 @@ stdenv.mkDerivation rec {
     cudaPackages.cudatoolkit
     cudaPackages.cuda_cudart
     cudaPackages.libnpp.static
+    cudaPackages.cuda_culibos
   ];
 
   postPatch = ''
@@ -79,7 +80,21 @@ stdenv.mkDerivation rec {
     substituteInPlace meson.build \
       --replace-fail \
         "npp_search_dirs = [cuda_target_lib_dir, cuda_lib_dir]" \
-        "npp_search_dirs = [cuda_target_lib_dir, cuda_lib_dir, '${cudaPackages.libnpp.static}/lib', '${cudaPackages.cuda_cudart}/lib']"
+        "npp_search_dirs = [cuda_target_lib_dir, cuda_lib_dir, '${cudaPackages.libnpp.static}/lib', '${cudaPackages.cuda_cudart}/lib', '${cudaPackages.cuda_culibos}/lib']"
+
+    # meson requires all NPP libs (incl. culibos) in one directory, which never
+    # matches the split Nix CUDA outputs, so no -L is emitted. Without it, nvcc's
+    # device-link step cannot find the NPP static archives and fails with
+    # undefined __cudaRegisterLinkedBinary_* symbols.
+    substituteInPlace meson.build \
+      --replace-fail \
+        "and fs.exists(dir / 'libnppc_static.a') and fs.exists(dir / 'libculibos.a')" \
+        "and fs.exists(dir / 'libnppc_static.a')"
+
+    substituteInPlace meson.build \
+      --replace-fail \
+        "npp_deps = declare_dependency(link_args: ['-L' + npp_lib_dir, '-lnppif_static', '-lnppig_static', '-lnppc_static', '-lculibos'])" \
+        "npp_deps = declare_dependency(link_args: ['-L' + npp_lib_dir, '-L' + '${cudaPackages.cuda_culibos}/lib', '-lnppif_static', '-lnppig_static', '-lnppc_static', '-lculibos'])"
 
     # meson's built-in dependency('cuda') doesn't work with Nix CUDA layout
     substituteInPlace meson.build \
