@@ -7,6 +7,7 @@
   pyproject-nix,
   pyproject-build-systems,
   opencv,
+  fetchurl,
   ffmpeg,
   chromium,
   akebi,
@@ -24,6 +25,21 @@ let
   inherit (callPackage ./source.nix { }) version konomitvSrc;
 
   python = python313;
+
+  # OpenCV 5 では CascadeClassifier が opencv_contrib (xobjdetect) へ移動し、
+  # opencv-python-headless の wheel から利用できなくなっているため 4.x に固定する。
+  opencvPythonHeadlessSrc = fetchurl {
+    url =
+      if stdenv.hostPlatform.isAarch64 then
+        "https://files.pythonhosted.org/packages/3f/0e/0b98bd582582253f61c4506f9b465cf5a8aa7fa4f7237dd99e1b5151a159/opencv_python_headless-4.14.0.94-cp37-abi3-manylinux_2_28_aarch64.whl"
+      else
+        "https://files.pythonhosted.org/packages/ae/ce/7f538891722a4f06921419d55bac6f41729258d54442861edb2de0dbdf5e/opencv_python_headless-4.14.0.94-cp37-abi3-manylinux_2_28_x86_64.whl";
+    hash =
+      if stdenv.hostPlatform.isAarch64 then
+        "sha256-l8boGMb3HAz6IU4SKTsdAmbWecOPTght4INXyKxuzg0="
+      else
+        "sha256-IR5YH1pGcKy74I//NqNemUYDnS7qKLgDlGMtA20b5Sc=";
+  };
 
   clientBundle = callPackage ../konomitv-client { };
 
@@ -155,6 +171,10 @@ let
       overlay
       # sdist-only packages that fail to declare their build requirements
       (final: prev: {
+        opencv-python-headless = prev.opencv-python-headless.overrideAttrs (_: {
+          version = "4.14.0.94";
+          src = opencvPythonHeadlessSrc;
+        });
         elevate = prev.elevate.overrideAttrs (old: {
           nativeBuildInputs = old.nativeBuildInputs ++ final.resolveBuildSystem { setuptools = [ ]; };
         });
