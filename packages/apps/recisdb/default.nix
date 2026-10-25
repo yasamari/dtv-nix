@@ -11,17 +11,17 @@
 }:
 rustPlatform.buildRustPackage rec {
   pname = "recisdb";
-  version = "1.3.1";
+  version = "1.3.2";
 
   src = fetchFromGitHub {
     owner = "kazuki0824";
     repo = "recisdb-rs";
     rev = version;
     fetchSubmodules = true;
-    hash = "sha256-Os3pf0WdkO9dk/ccoTLwV95ooVonIzfhe2MFekVvUwE=";
+    hash = "sha256-FMnr/sVvJQ5aQRX/DXqjmIAfA3Bd3U4cNUC0I/ahlmo=";
   };
 
-  cargoHash = "sha256-8UAs1N44+3dVSdgHGGVl32+KMMVrur1j06yMpxxQz2s=";
+  cargoHash = "sha256-VXktPRGidYOltoBajcwRQRxqnQ43E6qkfxZTQs+dBiU=";
 
   buildAndTestSubdir = "recisdb-rs";
   cargoBuildFeatures = [ "dvb" ];
