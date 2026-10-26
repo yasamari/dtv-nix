@@ -191,6 +191,10 @@ stdenv.mkDerivation {
   pname = "konomitv";
   inherit version;
 
+  # nix-update がソース URL とハッシュを解決するために必要。
+  # dontUnpack のため実際には展開されない。
+  src = konomitvSrc;
+
   dontUnpack = true;
 
   nativeBuildInputs = [ makeWrapper ];

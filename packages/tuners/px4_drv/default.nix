@@ -5,6 +5,7 @@
   linuxPackages,
   kernel ? linuxPackages.kernel,
   nix-update-script,
+  pahole,
   ...
 }:
 let
@@ -17,6 +18,10 @@ stdenv.mkDerivation {
   src = px4DrvSrc;
 
   sourceRoot = "source/driver";
+
+  # カーネルが CONFIG_DEBUG_INFO_BTF 有効で構成されている場合、
+  # BTF 生成のために pahole がビルド環境に必要になる。
+  nativeBuildInputs = [ pahole ];
 
   postPatch = ''
     substituteInPlace Makefile \

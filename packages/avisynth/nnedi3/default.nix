@@ -11,6 +11,8 @@
 }:
 stdenv.mkDerivation {
   pname = "nnedi3";
+  # 上流の cuda ブランチは AviSynthCUDAFilters のサブプロジェクト専用に
+  # 作り替えられ、単体ではビルドできない。単体ビルド可能な avsp ブランチを追従する。
   version = "0.9.4.51-unstable-2026-09-20";
 
   src = fetchFromGitHub {
@@ -36,7 +38,7 @@ stdenv.mkDerivation {
   passthru.updateScript = nix-update-script {
     extraArgs = [
       "--flake"
-      "--version=branch=cuda"
+      "--version=branch=avsp"
     ];
   };
 
