@@ -1,0 +1,190 @@
+name: Update packages
+
+on:
+  schedule:
+    - cron: "0 18 * * *" # 03:00 JST
+  workflow_dispatch:
+    inputs:
+      package:
+        description: "更新するパッケージ（空なら全件）"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: package-updates
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.discover.outputs.packages }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Discover update targets
+        id: discover
+        env:
+          REQUESTED: ${{ inputs.package }}
+        run: |
+          set -euo pipefail
+
+          # shellcheck disable=SC2016 # ${...} belongs to the Nix expression
+          packages=$(nix eval --json .#packages.x86_64-linux --apply '
+            ps: builtins.filter
+              (n: ((ps.${n}.passthru or {}) ? updateScript)
+                  && !(builtins.elem n [ "avisynthplus-cuda" "qsvenc-legacy" ]))
+              (builtins.attrNames ps)')
+
+          if [ -n "$REQUESTED" ]; then
+            if ! jq -e --arg p "$REQUESTED" 'index($p)' <<<"$packages" >/dev/null; then
+              echo "unknown or non-updatable package: $REQUESTED" >&2
+              exit 1
+            fi
+            packages=$(jq -c --arg p "$REQUESTED" '[ $p ]' <<<"$packages")
+          else
+            count=$(jq 'length' <<<"$packages")
+            if [ "$count" -ne 28 ]; then
+              echo "expected 28 update targets, found $count" >&2
+              jq . <<<"$packages" >&2
+              exit 1
+            fi
+          fi
+
+          echo "packages=$packages" >> "$GITHUB_OUTPUT"
+
+  update:
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        package: ${{ fromJSON(needs.prepare.outputs.packages) }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Free disk space
+        if: contains(fromJSON('["amatsukaze","konomitv","nvenc","qsvenc","avisynthcudafilters"]'), matrix.package)
+        uses: jlumbroso/free-disk-space@v2
+        with:
+          tool-cache: false
+
+      - uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Update package
+        id: update
+        env:
+          PKG: ${{ matrix.package }}
+        run: |
+          set -euo pipefail
+
+          old=$(nix eval --raw ".#packages.x86_64-linux.$PKG.version")
+          script=$(nix eval --json ".#packages.x86_64-linux.$PKG.passthru.updateScript")
+
+          if [ "$(jq -r 'type' <<<"$script")" != "array" ]; then
+            echo "unexpected updateScript for $PKG: $script" >&2
+            exit 1
+          fi
+          if [ "$(jq -r '.[0] | split("/") | last' <<<"$script")" != "nix-update" ]; then
+            echo "refusing to run non-nix-update script for $PKG: $script" >&2
+            exit 1
+          fi
+
+          mapfile -t args < <(jq -r '.[1:][]' <<<"$script")
+          UPDATE_NIX_ATTR_PATH="$PKG" UPDATE_NIX_OLD_VERSION="$old" \
+            nix shell --inputs-from . nixpkgs#nix-update -c nix-update "${args[@]}"
+
+          new=$(nix eval --raw ".#packages.x86_64-linux.$PKG.version")
+          changed=false
+          if [ -n "$(git status --porcelain)" ]; then
+            changed=true
+          fi
+
+          {
+            echo "old=$old"
+            echo "new=$new"
+            echo "changed=$changed"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Refresh Amatsukaze dependencies
+        if: steps.update.outputs.changed == 'true' && matrix.package == 'amatsukaze'
+        run: bash ./packages/apps/amatsukaze/update-deps.sh
+
+      - name: Refresh KonomiTV client dependencies
+        if: steps.update.outputs.changed == 'true' && matrix.package == 'konomitv'
+        run: |
+          set -euo pipefail
+          nix shell --inputs-from . nixpkgs#nix-update -c \
+            nix-update --flake --version=skip konomitv-client
+
+      - name: Format
+        if: steps.update.outputs.changed == 'true'
+        run: nix fmt
+
+      - name: Build affected packages
+        if: steps.update.outputs.changed == 'true'
+        env:
+          PKG: ${{ matrix.package }}
+        run: |
+          set -euo pipefail
+
+          case "$PKG" in
+            amatsukaze)
+              attrs=(amatsukaze amatsukaze-server-cli amatsukaze-script-command amatsukaze-add-task amatsukaze-native amatsukaze-webui)
+              ;;
+            konomitv)
+              attrs=(konomitv konomitv-client)
+              ;;
+            px4_drv)
+              attrs=(px4_drv ifd-px4 it930x-firmware)
+              ;;
+            qsvenc)
+              attrs=(qsvenc qsvenc-legacy)
+              ;;
+            ariblib)
+              attrs=(ariblib isdbscanner)
+              ;;
+            *)
+              attrs=("$PKG")
+              ;;
+          esac
+
+          installables=()
+          for attr in "${attrs[@]}"; do
+            installables+=(".#$attr")
+          done
+          nix build -L --no-link "${installables[@]}"
+
+      - name: Create pull request
+        if: steps.update.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          branch: update/${{ matrix.package }}
+          base: main
+          delete-branch: true
+          title: "`${{ matrix.package }}` を ${{ steps.update.outputs.new }} に更新"
+          commit-message: "${{ matrix.package }} を ${{ steps.update.outputs.new }} に更新"
+          body: |
+            `${{ matrix.package }}` の自動更新です。
+
+            - 更新前: `${{ steps.update.outputs.old }}`
+            - 更新後: `${{ steps.update.outputs.new }}`
+
+            関連パッケージのビルド検証はこのワークフロー内で完了しています。

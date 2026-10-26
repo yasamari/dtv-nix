@@ -2,6 +2,7 @@
   lib,
   buildGoModule,
   fetchFromGitHub,
+  nix-update-script,
   ...
 }:
 buildGoModule rec {
@@ -23,6 +24,13 @@ buildGoModule rec {
   postInstall = ''
     mv "$out/bin/https-server" "$out/bin/akebi-https-server"
   '';
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--flake"
+      "--version=branch=main"
+    ];
+  };
 
   meta = with lib; {
     description = "Lightweight HTTPS reverse proxy used by KonomiTV";

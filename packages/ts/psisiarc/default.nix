@@ -2,6 +2,7 @@
   lib,
   stdenv,
   fetchFromGitHub,
+  nix-update-script,
   ...
 }:
 stdenv.mkDerivation rec {
@@ -29,6 +30,13 @@ stdenv.mkDerivation rec {
     install -D -m 755 psisiarc "$out/bin/psisiarc"
     runHook postInstall
   '';
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--flake"
+      "--version=stable"
+    ];
+  };
 
   meta = with lib; {
     description = "Archive PSI/SI tables from MPEG-TS streams";

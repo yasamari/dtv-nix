@@ -2,6 +2,7 @@
   lib,
   python3,
   fetchFromGitHub,
+  nix-update-script,
   ...
 }:
 let
@@ -15,7 +16,7 @@ py.buildPythonPackage rec {
   src = fetchFromGitHub {
     owner = "tsukumijima";
     repo = "ariblib";
-    rev = "af6b7127692a4f26310756f09b4c81380fd3d750";
+    rev = "v${version}";
     hash = "sha256-P1JsZwymnenKwH/yiLVa3SU2f3H/A9izZl4tm5w+UNU=";
   };
 
@@ -23,6 +24,13 @@ py.buildPythonPackage rec {
 
   doCheck = false;
   pythonImportsCheck = [ "ariblib" ];
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--flake"
+      "--version=stable"
+    ];
+  };
 
   meta = with lib; {
     description = "Python implementation of ARIB STD-B10/B24";

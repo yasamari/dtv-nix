@@ -2,6 +2,7 @@
   lib,
   stdenv,
   fetchFromGitHub,
+  nix-update-script,
   ...
 }:
 stdenv.mkDerivation rec {
@@ -29,6 +30,13 @@ stdenv.mkDerivation rec {
     install -D -m 755 b24tovtt "$out/bin/b24tovtt"
     runHook postInstall
   '';
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--flake"
+      "--version=stable"
+    ];
+  };
 
   meta = with lib; {
     description = "Convert ARIB B24 captions to WebVTT";

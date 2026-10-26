@@ -20,6 +20,7 @@
   vulkan-headers,
   libx11,
   cudaPackages,
+  nix-update-script,
   ...
 }:
 stdenv.mkDerivation rec {
@@ -133,6 +134,13 @@ stdenv.mkDerivation rec {
 
     runHook postInstall
   '';
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--flake"
+      "--version=stable"
+    ];
+  };
 
   meta = with lib; {
     homepage = "https://github.com/rigaya/NVEnc";

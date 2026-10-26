@@ -6,6 +6,7 @@
   ninja,
   pkg-config,
   ffmpeg,
+  nix-update-script,
   ...
 }:
 stdenv.mkDerivation rec {
@@ -33,6 +34,13 @@ stdenv.mkDerivation rec {
     substituteInPlace meson.build \
       --replace-fail "version: run_command('bash', 'scripts/get-version.sh', check: true).stdout().strip()," "version: '${version}',"
   '';
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--flake"
+      "--version=stable"
+    ];
+  };
 
   meta = with lib; {
     homepage = "https://github.com/rigaya/tsreplace";

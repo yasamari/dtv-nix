@@ -7,6 +7,7 @@
   pcsclite,
   udev,
   v4l-utils,
+  nix-update-script,
   ...
 }:
 rustPlatform.buildRustPackage rec {
@@ -39,6 +40,13 @@ rustPlatform.buildRustPackage rec {
   ];
 
   doCheck = false;
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--flake"
+      "--version=stable"
+    ];
+  };
 
   meta = with lib; {
     description = "Rust-based ISDB tuner reader and ARIB STD-B25 decoder";

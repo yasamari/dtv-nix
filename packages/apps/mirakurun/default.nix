@@ -8,6 +8,7 @@
   bash,
   which,
   v4l-utils,
+  nix-update-script,
   ...
 }:
 buildNpmPackage rec {
@@ -60,6 +61,13 @@ buildNpmPackage rec {
       wrapProgram "$out/bin/mirakurun-epgdump" \
         --prefix PATH : ${lib.makeBinPath runtimeDeps}
     '';
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--flake"
+      "--version=branch=master"
+    ];
+  };
 
   meta = with lib; {
     description = "Resource manager for TV tuners";

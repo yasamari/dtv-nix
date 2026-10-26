@@ -4,6 +4,7 @@
   callPackage,
   linuxPackages,
   kernel ? linuxPackages.kernel,
+  nix-update-script,
   ...
 }:
 let
@@ -40,6 +41,15 @@ stdenv.mkDerivation {
 
     runHook postInstall
   '';
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--flake"
+      "--version=stable"
+      "--override-filename"
+      "packages/tuners/px4_drv/source.nix"
+    ];
+  };
 
   meta = with lib; {
     description = "Unofficial Linux driver for PLEX PX4/PX5/PX-MLT series ISDB-T/S receivers";

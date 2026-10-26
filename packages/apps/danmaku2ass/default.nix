@@ -4,6 +4,7 @@
   python3,
   fetchFromGitHub,
   makeWrapper,
+  nix-update-script,
   ...
 }:
 stdenvNoCC.mkDerivation rec {
@@ -32,6 +33,13 @@ stdenvNoCC.mkDerivation rec {
 
     runHook postInstall
   '';
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--flake"
+      "--version=branch=master"
+    ];
+  };
 
   meta = with lib; {
     description = "Convert danmaku comments to ASS subtitles";

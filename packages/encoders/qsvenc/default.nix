@@ -54,6 +54,7 @@
   vpl-gpu-rt,
   intel-compute-runtime,
   cmrt,
+  nix-update-script,
   useLegacyIntel ? false,
 }:
 let
@@ -162,6 +163,13 @@ stdenv.mkDerivation rec {
 
     runHook postInstall
   '';
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--flake"
+      "--version=stable"
+    ];
+  };
 
   meta = with lib; {
     homepage = "https://github.com/rigaya/QSVEnc";

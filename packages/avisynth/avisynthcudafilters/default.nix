@@ -7,6 +7,7 @@
   pkg-config,
   cudaPackages,
   avisynthplus-cuda,
+  nix-update-script,
   ...
 }:
 stdenv.mkDerivation rec {
@@ -80,6 +81,13 @@ stdenv.mkDerivation rec {
       fi
     done
   '';
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--flake"
+      "--version=stable"
+    ];
+  };
 
   meta = with lib; {
     description = "CUDA-powered filters for AviSynth+";

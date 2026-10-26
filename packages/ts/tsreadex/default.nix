@@ -2,16 +2,17 @@
   lib,
   stdenv,
   fetchFromGitHub,
+  nix-update-script,
   ...
 }:
 stdenv.mkDerivation rec {
   pname = "tsreadex";
-  version = "master-a82528c";
+  version = "master-260428";
 
   src = fetchFromGitHub {
     owner = "xtne6f";
     repo = "tsreadex";
-    rev = "a82528ccb698fcd07b4da1bb2243e63d685c34a7";
+    rev = version;
     hash = "sha256-jszkLID4J0ECs688bj9qlntjZ7NHYi6fPRB1HR2acos=";
   };
 
@@ -29,6 +30,13 @@ stdenv.mkDerivation rec {
     install -D -m 755 tsreadex "$out/bin/tsreadex"
     runHook postInstall
   '';
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--flake"
+      "--version=stable"
+    ];
+  };
 
   meta = with lib; {
     description = "Extended MPEG-TS stream reader used by EDCB";

@@ -5,6 +5,7 @@
   libusb1,
   ariblib,
   recisdb,
+  nix-update-script,
   ...
 }:
 
@@ -77,6 +78,13 @@ py.buildPythonApplication rec {
   doCheck = false;
 
   pythonImportsCheck = [ "isdb_scanner" ];
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--flake"
+      "--version=stable"
+    ];
+  };
 
   meta = with lib; {
     description = "Automatic scanner for Japanese TV broadcast channels (ISDB-T/ISDB-S)";

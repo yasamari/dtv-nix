@@ -4,6 +4,7 @@
   fetchFromGitHub,
   makeWrapper,
   avisynthplus,
+  nix-update-script,
   ...
 }:
 stdenv.mkDerivation {
@@ -36,6 +37,13 @@ stdenv.mkDerivation {
 
     runHook postInstall
   '';
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--flake"
+      "--version=branch=master"
+    ];
+  };
 
   meta = with lib; {
     description = "Commercial break chapter analysis helper for Amatsukaze";

@@ -3,6 +3,7 @@
   stdenv,
   fetchFromGitHub,
   gnumake,
+  nix-update-script,
   ...
 }:
 stdenv.mkDerivation rec {
@@ -42,6 +43,13 @@ stdenv.mkDerivation rec {
 
     runHook postInstall
   '';
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--flake"
+      "--version=branch=main"
+    ];
+  };
 
   meta = with lib; {
     description = "BonDriver_LinuxMirakc for EDCB";

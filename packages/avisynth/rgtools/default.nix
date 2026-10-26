@@ -3,6 +3,7 @@
   stdenv,
   fetchFromGitHub,
   cmake,
+  nix-update-script,
   ...
 }:
 stdenv.mkDerivation rec {
@@ -21,6 +22,13 @@ stdenv.mkDerivation rec {
   cmakeFlags = [
     "-DCMAKE_INSTALL_LIBDIR=lib"
   ];
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--flake"
+      "--version=stable"
+    ];
+  };
 
   meta = with lib; {
     description = "RgTools Avisynth plugin";

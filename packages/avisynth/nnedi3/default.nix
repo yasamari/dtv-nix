@@ -6,6 +6,7 @@
   ninja,
   pkg-config,
   avisynthplus,
+  nix-update-script,
   ...
 }:
 stdenv.mkDerivation {
@@ -31,6 +32,13 @@ stdenv.mkDerivation {
     substituteInPlace nnedi3/meson.build \
       --replace-fail "install_dir : get_option('libdir')" "install_dir : 'lib/avisynth'"
   '';
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--flake"
+      "--version=branch=cuda"
+    ];
+  };
 
   meta = with lib; {
     description = "NNEDI3 deinterlacing plugin for AviSynth+";

@@ -4,6 +4,7 @@
   fetchFromGitHub,
   cmake,
   avisynthplus,
+  nix-update-script,
   ...
 }:
 let
@@ -34,6 +35,13 @@ stdenv.mkDerivation rec {
   cmakeFlags = [
     "-DCMAKE_INSTALL_LIBDIR=lib"
   ];
+
+  passthru.updateScript = nix-update-script {
+    extraArgs = [
+      "--flake"
+      "--version=stable"
+    ];
+  };
 
   meta = with lib; {
     description = "YADIF Avisynth plugin for Linux";
