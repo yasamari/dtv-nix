@@ -7,7 +7,7 @@
 }:
 buildGoModule rec {
   pname = "akebi";
-  version = "unstable-2026-04-03";
+  version = "0-unstable-2025-11-20";
 
   src = fetchFromGitHub {
     owner = "tsukumijima";
