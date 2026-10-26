@@ -8,7 +8,7 @@
 }:
 stdenv.mkDerivation rec {
   pname = "join_logo_scp";
-  version = "5.1.1_Linux";
+  version = "Ver4.1.0_Linux-unstable-2026-09-26";
 
   src = fetchFromGitHub {
     owner = "tobitti0";
