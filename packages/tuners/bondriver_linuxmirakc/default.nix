@@ -8,7 +8,7 @@
 }:
 stdenv.mkDerivation rec {
   pname = "bondriver-linuxmirakc";
-  version = "main-2024-10-14";
+  version = "0-unstable-2024-10-14";
 
   src = fetchFromGitHub {
     owner = "matching";
