@@ -18,13 +18,13 @@ let
 in
 stdenv.mkDerivation rec {
   pname = "edcb";
-  version = "0-unstable-2026-09-21";
+  version = "0-unstable-2026-10-18";
 
   src = fetchFromGitHub {
     owner = "tkntrec";
     repo = "EDCB";
-    rev = "622a1d3a456d6e8df37a966976ed93c605fa26b9";
-    hash = "sha256-+jCkAwfPFRTqqJKfnOvADwNq2AMzNJuvVRQxcwP6qo4=";
+    rev = "b49da1c93ddc01904459c69886a3dd02bc1b8997";
+    hash = "sha256-CbUSerPa8FkK6grCKXADnKbf3k++zqYAzMKMpN6z4Zs=";
   };
 
   strictDeps = true;
