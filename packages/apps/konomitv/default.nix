@@ -6,8 +6,6 @@
   uv2nix,
   pyproject-nix,
   pyproject-build-systems,
-  opencv,
-  fetchurl,
   ffmpeg,
   chromium,
   akebi,
@@ -25,21 +23,6 @@ let
   inherit (callPackage ./source.nix { }) version konomitvSrc;
 
   python = python313;
-
-  # OpenCV 5 では CascadeClassifier が opencv_contrib (xobjdetect) へ移動し、
-  # opencv-python-headless の wheel から利用できなくなっているため 4.x に固定する。
-  opencvPythonHeadlessSrc = fetchurl {
-    url =
-      if stdenv.hostPlatform.isAarch64 then
-        "https://files.pythonhosted.org/packages/3f/0e/0b98bd582582253f61c4506f9b465cf5a8aa7fa4f7237dd99e1b5151a159/opencv_python_headless-4.14.0.94-cp37-abi3-manylinux_2_28_aarch64.whl"
-      else
-        "https://files.pythonhosted.org/packages/ae/ce/7f538891722a4f06921419d55bac6f41729258d54442861edb2de0dbdf5e/opencv_python_headless-4.14.0.94-cp37-abi3-manylinux_2_28_x86_64.whl";
-    hash =
-      if stdenv.hostPlatform.isAarch64 then
-        "sha256-l8boGMb3HAz6IU4SKTsdAmbWecOPTght4INXyKxuzg0="
-      else
-        "sha256-IR5YH1pGcKy74I//NqNemUYDnS7qKLgDlGMtA20b5Sc=";
-  };
 
   clientBundle = callPackage ../konomitv-client { };
 
@@ -79,12 +62,6 @@ let
     # アーキテクチャとサードパーティーライブラリのチェックに失敗しても動作するようにする。
     substituteInPlace KonomiTV.py --replace-fail "sys.exit(1)" ""
 
-    # OpenCV のカスケード分類器のパスを修正する。
-    substituteInPlace app/metadata/ThumbnailGenerator.py \
-      --replace-fail \
-      "pathlib.Path(cv2.__file__).parent / 'data' / 'haarcascade_frontalface_default.xml'" \
-      "pathlib.Path('${opencv}/share/opencv4/haarcascades/haarcascade_frontalface_default.xml')"
-
     # os のインポートを追加する。
     substituteInPlace app/config.py app/constants.py \
       --replace-fail "import sys" "import sys${"\n"}import os"
@@ -92,7 +69,7 @@ let
     # 設定ファイルのパスを環境変数で設定できるように変更する。
     substituteInPlace app/config.py \
       --replace-fail \
-      "_CONFIG_YAML_PATH = BASE_DIR.parent / 'config.yaml'" \
+      "_CONFIG_YAML_PATH = BASE_DIR.parent / f'config{TEST_SUFFIX}.yaml'" \
       "_CONFIG_YAML_PATH = Path(os.getenv('KONOMITV_CONFIG_YAML_PATH', str(Path.cwd() / 'config.yaml')))"
 
     # クライアントバンドルと静的ファイルのパスを直接指定する。
@@ -113,11 +90,11 @@ let
       "LOGS_DIR = BASE_DIR / 'logs'" \
       "LOGS_DIR = Path(os.getenv('KONOMITV_LOGS_DIR', str(Path.cwd() / 'logs')))${"\n"}LOGS_DIR.mkdir(parents=True, exist_ok=True)" \
       --replace-fail \
-      "ACCOUNT_ICON_DIR = DATA_DIR / 'account-icons'" \
-      "ACCOUNT_ICON_DIR = DATA_DIR / 'account-icons'${"\n"}ACCOUNT_ICON_DIR.mkdir(parents=True, exist_ok=True)" \
+      "ACCOUNT_ICON_DIR = DATA_DIR / f'account-icons{TEST_SUFFIX}'" \
+      "ACCOUNT_ICON_DIR = DATA_DIR / f'account-icons{TEST_SUFFIX}'${"\n"}ACCOUNT_ICON_DIR.mkdir(parents=True, exist_ok=True)" \
       --replace-fail \
-      "THUMBNAILS_DIR = DATA_DIR / 'thumbnails'" \
-      "THUMBNAILS_DIR = DATA_DIR / 'thumbnails'${"\n"}THUMBNAILS_DIR.mkdir(parents=True, exist_ok=True)"
+      "THUMBNAILS_DIR = DATA_DIR / f'thumbnails{TEST_SUFFIX}'" \
+      "THUMBNAILS_DIR = DATA_DIR / f'thumbnails{TEST_SUFFIX}'${"\n"}THUMBNAILS_DIR.mkdir(parents=True, exist_ok=True)"
 
     # サードパーティーライブラリのパスを直接指定する。VCEEncC と rkmppenc はパッケージ化できていないため環境変数で指定できるようにする。
     substituteInPlace app/constants.py \
@@ -171,10 +148,6 @@ let
       overlay
       # sdist-only packages that fail to declare their build requirements
       (final: prev: {
-        opencv-python-headless = prev.opencv-python-headless.overrideAttrs (_: {
-          version = "4.14.0.94";
-          src = opencvPythonHeadlessSrc;
-        });
         elevate = prev.elevate.overrideAttrs (old: {
           nativeBuildInputs = old.nativeBuildInputs ++ final.resolveBuildSystem { setuptools = [ ]; };
         });
