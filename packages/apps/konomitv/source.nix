@@ -1,11 +1,11 @@
 { fetchFromGitHub, ... }:
 {
-  version = "0.14.1-unstable-2026-10-29";
+  version = "0.14.1-unstable-2026-10-30";
 
   konomitvSrc = fetchFromGitHub {
     owner = "tsukumijima";
     repo = "KonomiTV";
-    rev = "b79e0703e29a94b534b9ac9e41880b2a5bc54f13";
-    hash = "sha256-pB9pd8TuWJrOJx5Wh41268nW9YIZlxmiTzKgeioPGag=";
+    rev = "1319cf39ea098ecca31cee4e2e59cffb94136292";
+    hash = "sha256-OINr8ftleUfeudGi3rg7m20wbpTn0Vs91OD29U0AewY=";
   };
 }
