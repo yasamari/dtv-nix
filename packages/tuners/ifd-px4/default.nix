@@ -14,40 +14,21 @@ stdenv.mkDerivation {
 
   src = px4DrvSrc;
 
-  sourceRoot = "source/userland/ifd-px4";
+  sourceRoot = "source/pcsc";
 
   strictDeps = true;
   dontConfigure = true;
 
-  buildPhase = ''
-    runHook preBuild
-
-    $CC \
-      -Wall \
-      -O2 \
-      -fPIC \
-      -I../../include \
-      -I${pcsclite.dev}/include \
-      -I${pcsclite.dev}/include/PCSC \
-      -c ifdhandler.c
-
-    $CC -shared -o libpx4ifd.so ifdhandler.o
-
-    runHook postBuild
-  '';
-
-  installPhase = ''
-    runHook preInstall
-
-    install -D -m 755 libpx4ifd.so "$out/pcsc/drivers/ifd-px4.bundle/Contents/Linux/libpx4ifd.so"
-    install -D -m 644 Info.plist "$out/pcsc/drivers/ifd-px4.bundle/Contents/Info.plist"
-
-    runHook postInstall
-  '';
+  makeFlags = [
+    "BUILD=build"
+    "DESTDIR=${placeholder "out"}"
+    "USBDROPDIR=/pcsc/drivers"
+    "PCSC_CFLAGS=-I${pcsclite.dev}/include/PCSC"
+  ];
 
   meta = with lib; {
     description = "PC/SC IFD handler for the px4_drv smart card reader";
-    homepage = "https://github.com/yyya-nico/px4_drv/tree/v0.6.11/userland/ifd-px4";
+    homepage = "https://github.com/tsukumijima/px4_drv/tree/v${version}/pcsc";
     license = licenses.gpl2Only;
     platforms = platforms.linux;
     maintainers = [ ];

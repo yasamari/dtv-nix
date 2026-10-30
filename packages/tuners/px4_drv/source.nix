@@ -1,10 +1,10 @@
 { fetchFromGitHub, ... }: rec {
-  version = "0.6.12";
+  version = "0.7.0";
 
   px4DrvSrc = fetchFromGitHub {
-    owner = "yyya-nico";
+    owner = "tsukumijima";
     repo = "px4_drv";
     rev = "v${version}";
-    hash = "sha256-ijlN6RZnj2QVoXv0ianZxMP+ivzbVDtVhivDstcC414=";
+    hash = "sha256-vuT89Gexk/OeUMyPtDSdcHyN7/oJuLoAjKm6aI1TQJE=";
   };
 }

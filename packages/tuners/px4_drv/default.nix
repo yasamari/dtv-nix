@@ -58,7 +58,7 @@ stdenv.mkDerivation {
 
   meta = with lib; {
     description = "Unofficial Linux driver for PLEX PX4/PX5/PX-MLT series ISDB-T/S receivers";
-    homepage = "https://github.com/yyya-nico/px4_drv";
+    homepage = "https://github.com/tsukumijima/px4_drv";
     license = licenses.gpl2Only;
     platforms = platforms.linux;
     maintainers = [ ];
