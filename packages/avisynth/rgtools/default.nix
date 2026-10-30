@@ -8,13 +8,13 @@
 }:
 stdenv.mkDerivation rec {
   pname = "rgtools";
-  version = "1.2";
+  version = "1.3";
 
   src = fetchFromGitHub {
     owner = "pinterf";
     repo = "RgTools";
     tag = version;
-    hash = "sha256-xzJwJAuLxLUFidXZq5EaBFE8haclEYqKQ9aLVi2upD8=";
+    hash = "sha256-oCz8W/lPmg3zxk2+PpWpOgUrUCEzoCEbyqq1hbaa7hk=";
   };
 
   nativeBuildInputs = [ cmake ];
