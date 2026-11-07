@@ -10,14 +10,14 @@ let
 in
 py.buildPythonPackage rec {
   pname = "ariblib";
-  version = "0.1.4";
-  format = "setuptools";
+  version = "0.2.0";
+  format = "pyproject";
 
   src = fetchFromGitHub {
     owner = "tsukumijima";
     repo = "ariblib";
     rev = "v${version}";
-    hash = "sha256-P1JsZwymnenKwH/yiLVa3SU2f3H/A9izZl4tm5w+UNU=";
+    hash = "sha256-jF5NnOSiV2MbZ2jkK++sVqCRwNxj8V+kLfvOPEX0uc8=";
   };
 
   nativeBuildInputs = [ py.setuptools ];
