@@ -5,7 +5,7 @@
   konomitvSrc = fetchFromGitHub {
     owner = "tsukumijima";
     repo = "KonomiTV";
-    rev = "5589ee08d0afbb8d0203465fb47185e6c1e1277c";
-    hash = "sha256-cIsMTqv/w0nHOnXIAYi2CVcLQ7LiLKnNL4ofXjG6glc=";
+    rev = "b5c58ee57e52d2d69f8923b6d3e9d27cc29f1f96";
+    hash = "sha256-Y/aIO0kprKc/rcMwD4/lqe3+5LgmYHiDYiuhaC8Yi6o=";
   };
 }
