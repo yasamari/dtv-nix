@@ -8,13 +8,13 @@
 }:
 stdenv.mkDerivation rec {
   pname = "masktools";
-  version = "2.2.30";
+  version = "2.3";
 
   src = fetchFromGitHub {
     owner = "pinterf";
     repo = "masktools";
     tag = version;
-    hash = "sha256-xetxTBn1WAmsyZ7PG5tcywIFejjFBS3T9Eiy3xaPItQ=";
+    hash = "sha256-44CnQk40wA4Pe37CviD+33pYP9m51atDj6MZo8M+L9c=";
   };
 
   nativeBuildInputs = [ cmake ];
