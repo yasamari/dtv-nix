@@ -8,13 +8,13 @@
 }:
 stdenv.mkDerivation rec {
   pname = "bondriver-linuxmirakc";
-  version = "0-unstable-2024-10-14";
+  version = "0-unstable-2026-11-07";
 
   src = fetchFromGitHub {
     owner = "matching";
     repo = "BonDriver_LinuxMirakc";
-    rev = "cfbefc6d21dab4009db5f124984c1b720b76d869";
-    hash = "sha256-nEWCuA0BRY7qFNASV4jj0BKRpFXIyJzgI1ch1nyoSQ0=";
+    rev = "bc1d70c7415ea5b49b8384151045b0c826fded5c";
+    hash = "sha256-NFoujpjB5EALbdMg0NAO+Wzgvz6JWss1GArH4dn/Kac=";
     fetchSubmodules = true;
   };
 
