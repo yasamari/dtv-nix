@@ -61,6 +61,7 @@ in
 
   # tuners
   bondriver_linuxmirakc = final.callPackage ./packages/tuners/bondriver_linuxmirakc { };
+  bondriver_linuxmirakurunbs4k = final.callPackage ./packages/tuners/bondriver_linuxmirakurunbs4k { };
   ifd-px4 = final.callPackage ./packages/tuners/ifd-px4 { };
   it930x-firmware = final.callPackage ./packages/tuners/it930x-firmware { };
   px4_drv = final.callPackage ./packages/tuners/px4_drv { };
