@@ -26,6 +26,7 @@ in
   konomitv-client = final.callPackage ./packages/apps/konomitv-client { };
   mirakurun = final.callPackage ./packages/apps/mirakurun { };
   recisdb = final.callPackage ./packages/apps/recisdb { };
+  dantto4k = final.callPackage ./packages/apps/dantto4k { };
 
   # avisynth
   avisynthcudafilters = final.callPackage ./packages/avisynth/avisynthcudafilters {
