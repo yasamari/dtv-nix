@@ -9,13 +9,13 @@
 }:
 stdenv.mkDerivation rec {
   pname = "mvtools";
-  version = "2.7.48";
+  version = "2.7.49";
 
   src = fetchFromGitHub {
     owner = "pinterf";
     repo = "mvtools";
     tag = version;
-    hash = "sha256-Z2IRX2NJNLd1d9mlYT3X2i7oaEMCebgJITKgVDEV7v8=";
+    hash = "sha256-5qsLD42OpfLt/sX/ZUsRsBECn2omaA3YqB+fqlB/8ug=";
   };
 
   nativeBuildInputs = [ cmake ];
