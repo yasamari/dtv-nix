@@ -12,12 +12,12 @@
 }:
 buildNpmPackage rec {
   pname = "dmirakurun";
-  version = "4.1.5-d1-unstable-2026-10-20";
+  version = "4.1.5-d1";
 
   src = fetchFromGitHub {
     owner = "jp-dtv-4k";
     repo = "DMirakurun";
-    rev = "7a98eb8ec49df83c64e65cae82b8782afc544903";
+    rev = version;
     hash = "sha256-/DY9kJQU6BpH2IrmQG2CqV59MYl1RGaErtkQEA6xrGA=";
   };
 
