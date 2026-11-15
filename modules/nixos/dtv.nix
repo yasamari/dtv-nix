@@ -10,10 +10,4 @@ in
     self.nixosModules.konomitv
     self.nixosModules.px4
   ];
-
-  nixpkgs.overlays = [
-    (final: prev: {
-      mirakurun = self.packages.${system}.mirakurun;
-    })
-  ];
 }
