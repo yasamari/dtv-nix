@@ -31,16 +31,13 @@ let
   postCommandSetup = lib.concatStringsSep "\n" (
     lib.mapAttrsToList (
       name: command:
-      let
-        script = if command == null then null else pkgs.writeShellScript "${name}.sh" command;
-      in
       if command == null then
         ''
           rm -f "${stateDir}/${name}.sh"
         ''
       else
         ''
-          ln -sfn "${script}" "${stateDir}/${name}.sh"
+          ln -sfn "${pkgs.writeShellScript "${name}.sh" command}" "${stateDir}/${name}.sh"
         ''
     ) postCommandFiles
   );
@@ -51,21 +48,38 @@ let
     '') edcbLibs
   );
 
-  bonDriver = self.packages.${system}.bondriver_linuxmirakc;
+  enabledBonDrivers = lib.filterAttrs (_: drv: drv.enable) cfg.bonDrivers;
 
-  generateBonDriverIni =
-    priority:
-    lib.generators.toINI { } {
-      GLOBAL = {
-        SERVER_HOST = cfg.bonDriver.mirakc.host;
-        SERVER_PORT = cfg.bonDriver.mirakc.port;
-        SERVER_SOCKPATH = cfg.bonDriver.mirakc.socketPath;
-        SERVER_TYPE = cfg.bonDriver.mirakc.serverType;
-        DECODE_B25 = 1;
-        PRIORITY = priority;
-        SERVICE_SPLIT = 0;
-      };
-    };
+  resolveSoFile =
+    name: drv: if drv.soFile != null then drv.soFile else "${drv.package}/lib/edcb/${name}.so";
+
+  resolveIniFile =
+    name: drv:
+    if drv.iniFile != null then
+      drv.iniFile
+    else if drv.settings != null then
+      pkgs.writeText "${name}.so.ini" (lib.generators.toINI { } drv.settings)
+    else
+      null;
+
+  installBonDriver =
+    name: drv:
+    let
+      iniFile = resolveIniFile name drv;
+    in
+    ''
+      install -m 0644 ${lib.escapeShellArg (resolveSoFile name drv)} "$libDir/${name}.so"
+    ''
+    + lib.optionalString (iniFile != null) ''
+      install -m 0644 ${lib.escapeShellArg iniFile} "$libDir/${name}.so.ini"
+    ''
+    + lib.optionalString (drv.chSet4File != null) ''
+      install -m 0644 ${lib.escapeShellArg drv.chSet4File} "$settingDir/${name}(${drv.tunerName}).ChSet4.txt"
+    '';
+
+  installBonDrivers = lib.concatStringsSep "\n" (
+    lib.mapAttrsToList installBonDriver enabledBonDrivers
+  );
 
   initializeState = pkgs.writeShellScript "edcb-initialize-state" ''
     set -eu
@@ -112,21 +126,82 @@ let
 
     ${linkEdcbLibs}
 
-    srcSo="${bonDriver}/lib/edcb/BonDriver_LinuxMirakc.so"
+    # 宣言から外した BonDriver が残らないよう、管理対象の BonDriver_* を一旦消す
+    rm -f "$libDir"/BonDriver_*
 
-    install -m 0644 "$srcSo" "$libDir/BonDriver_LinuxMirakc.so"
-    install -m 0644 "$srcSo" "$libDir/BonDriver_LinuxMirakc_T.so"
-    install -m 0644 "$srcSo" "$libDir/BonDriver_LinuxMirakc_S.so"
+    ${installBonDrivers}
 
-    install -m 0644 "${cfg.bonDriver.chSet5File}" "$settingDir/ChSet5.txt"
-    install -m 0644 "${cfg.bonDriver.multiChSet4File}" "$settingDir/BonDriver_LinuxMirakc(LinuxMirakc).ChSet4.txt"
-    install -m 0644 "${cfg.bonDriver.terrestrialChSet4File}" "$settingDir/BonDriver_LinuxMirakc_T(LinuxMirakc).ChSet4.txt"
-    install -m 0644 "${cfg.bonDriver.satelliteChSet4File}" "$settingDir/BonDriver_LinuxMirakc_S(LinuxMirakc).ChSet4.txt"
-
-    install -m 0644 "${pkgs.writeText "BonDriver_LinuxMirakc.so.ini" (generateBonDriverIni 8)}" "$libDir/BonDriver_LinuxMirakc.so.ini"
-    install -m 0644 "${pkgs.writeText "BonDriver_LinuxMirakc_T.so.ini" (generateBonDriverIni 9)}" "$libDir/BonDriver_LinuxMirakc_T.so.ini"
-    install -m 0644 "${pkgs.writeText "BonDriver_LinuxMirakc_S.so.ini" (generateBonDriverIni 10)}" "$libDir/BonDriver_LinuxMirakc_S.so.ini"
+    ${lib.optionalString (cfg.bonDriver.chSet5File != null) ''
+      install -m 0644 "${cfg.bonDriver.chSet5File}" "$settingDir/ChSet5.txt"
+    ''}
   '';
+
+  iniValueType = lib.types.oneOf [
+    lib.types.bool
+    lib.types.int
+    lib.types.float
+    lib.types.str
+  ];
+
+  bonDriverModule =
+    { name, ... }:
+    {
+      options = {
+        enable = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = "この BonDriver を配置します。";
+        };
+
+        package = lib.mkOption {
+          type = lib.types.nullOr lib.types.package;
+          default = null;
+          description = ''
+            BonDriver を含むパッケージ。`soFile` が未指定の場合、
+            `''${package}/lib/edcb/${name}.so` を使用します。
+          '';
+        };
+
+        soFile = lib.mkOption {
+          type = lib.types.nullOr lib.types.path;
+          default = null;
+          description = "BonDriver 本体 (.so) のパス。指定した場合は `package` より優先されます。";
+        };
+
+        settings = lib.mkOption {
+          type = lib.types.nullOr (lib.types.attrsOf (lib.types.attrsOf iniValueType));
+          default = null;
+          example = {
+            GLOBAL = {
+              PRIORITY = 8;
+            };
+          };
+          description = "`${name}.so.ini` の内容 (INI 形式に変換されます)。`iniFile` とは同時に指定できません。";
+        };
+
+        iniFile = lib.mkOption {
+          type = lib.types.nullOr lib.types.path;
+          default = null;
+          description = "`${name}.so.ini` としてそのまま配置するファイル。`settings` とは同時に指定できません。";
+        };
+
+        tunerName = lib.mkOption {
+          type = lib.types.nullOr lib.types.str;
+          default = null;
+          example = "PT3";
+          description = ''
+            BonDriver が返すチューナー名。ChSet4.txt のファイル名
+            `${name}(<tunerName>).ChSet4.txt` に使用します。`chSet4File` 指定時は必須です。
+          '';
+        };
+
+        chSet4File = lib.mkOption {
+          type = lib.types.nullOr lib.types.path;
+          default = null;
+          description = "ChSet4.txt として配置するファイル。";
+        };
+      };
+    };
 in
 {
   options.services.edcb = {
@@ -205,61 +280,53 @@ in
       description = "更新通知が送られたときに実行するコマンド。";
     };
 
-    bonDriver = {
-      multiChSet4File = lib.mkOption {
-        type = lib.types.nullOr lib.types.path;
-        default = null;
-        description = "BonDriver_mirakc(BonDriver_mirakc).ChSet4.txtのパス。";
-      };
-      terrestrialChSet4File = lib.mkOption {
-        type = lib.types.nullOr lib.types.path;
-        default = null;
-        description = "BonDriver_mirakc_T(BonDriver_mirakc).ChSet4.txtのパス。";
-      };
-      satelliteChSet4File = lib.mkOption {
-        type = lib.types.nullOr lib.types.path;
-        default = null;
-        description = "BonDriver_mirakc_S(BonDriver_mirakc).ChSet4.txtのパス。";
-      };
+    bonDrivers = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.submodule bonDriverModule);
+      default = { };
+      example = lib.literalExpression ''
+        {
+          BonDriver_LinuxMirakc_T = {
+            package = pkgs.bondriver_linuxmirakc;
+            settings.GLOBAL.PRIORITY = 9;
+            tunerName = "LinuxMirakc";
+            chSet4File = ./BonDriver_LinuxMirakc_T.ChSet4.txt;
+          };
+        }
+      '';
+      description = ''
+        EDCB に配置する BonDriver。属性名が BonDriver 名 (`BonDriver_` で始まる、拡張子なし) になります。
+      '';
+    };
 
-      chSet5File = lib.mkOption {
-        type = lib.types.nullOr lib.types.path;
-        default = null;
-        description = "ChSet5.txtのパス。";
-      };
-
-      mirakc = {
-        serverType = lib.mkOption {
-          type = lib.types.enum [
-            "http"
-            "unix"
-          ];
-          default = if config.services.mirakurun.enable then "unix" else "http";
-          description = "Mirakurunに接続する方法。unixかhttpを選択します。";
-        };
-
-        socketPath = lib.mkOption {
-          type = lib.types.path;
-          default = config.services.mirakurun.unixSocket;
-          description = "MirakurunのUNIXドメインソケットのパス。serverTypeがhttpの場合は使用されません。";
-        };
-
-        host = lib.mkOption {
-          type = lib.types.str;
-          default = "127.0.0.1";
-          description = "Mirakurunのホスト名またはIPアドレス。serverTypeがunixの場合は使用されません。";
-        };
-
-        port = lib.mkOption {
-          type = lib.types.ints.between 1 65534;
-          default = 40772;
-          description = "Mirakurunのポート番号。serverTypeがunixの場合は使用されません。";
-        };
-      };
+    bonDriver.chSet5File = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = null;
+      description = "ChSet5.txtのパス。";
     };
   };
 
   config = lib.mkIf cfg.enable {
+    assertions = lib.concatLists (
+      lib.mapAttrsToList (name: drv: [
+        {
+          assertion = lib.hasPrefix "BonDriver_" name;
+          message = "services.edcb.bonDrivers.${name}: BonDriver 名は `BonDriver_` で始まる必要があります。";
+        }
+        {
+          assertion = drv.soFile != null || drv.package != null;
+          message = "services.edcb.bonDrivers.${name}: `package` か `soFile` のどちらかを指定してください。";
+        }
+        {
+          assertion = !(drv.settings != null && drv.iniFile != null);
+          message = "services.edcb.bonDrivers.${name}: `settings` と `iniFile` は同時に指定できません。";
+        }
+        {
+          assertion = drv.chSet4File == null || drv.tunerName != null;
+          message = "services.edcb.bonDrivers.${name}: `chSet4File` を指定する場合は `tunerName` も指定してください。";
+        }
+      ]) enabledBonDrivers
+    );
+
     environment.systemPackages = [ cfg.package ];
 
     users.groups.${cfg.group} = { };
