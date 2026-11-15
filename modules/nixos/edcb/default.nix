@@ -131,8 +131,8 @@ let
 
     ${installBonDrivers}
 
-    ${lib.optionalString (cfg.bonDriver.chSet5File != null) ''
-      install -m 0644 "${cfg.bonDriver.chSet5File}" "$settingDir/ChSet5.txt"
+    ${lib.optionalString (cfg.chSet5File != null) ''
+      install -m 0644 "${cfg.chSet5File}" "$settingDir/ChSet5.txt"
     ''}
   '';
 
@@ -298,7 +298,7 @@ in
       '';
     };
 
-    bonDriver.chSet5File = lib.mkOption {
+    chSet5File = lib.mkOption {
       type = lib.types.nullOr lib.types.path;
       default = null;
       description = "ChSet5.txtのパス。";
