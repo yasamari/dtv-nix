@@ -68,13 +68,13 @@ let
       iniFile = resolveIniFile name drv;
     in
     ''
-      install -m 0644 ${lib.escapeShellArg (resolveSoFile name drv)} "$libDir/${name}.so"
+      install -m 0644 "${resolveSoFile name drv}" "$libDir/${name}.so"
     ''
     + lib.optionalString (iniFile != null) ''
-      install -m 0644 ${lib.escapeShellArg iniFile} "$libDir/${name}.so.ini"
+      install -m 0644 "${iniFile}" "$libDir/${name}.so.ini"
     ''
     + lib.optionalString (drv.chSet4File != null) ''
-      install -m 0644 ${lib.escapeShellArg drv.chSet4File} "$settingDir/${name}(${drv.tunerName}).ChSet4.txt"
+      install -m 0644 "${drv.chSet4File}" "$settingDir/${name}(${drv.tunerName}).ChSet4.txt"
     '';
 
   installBonDrivers = lib.concatStringsSep "\n" (
