@@ -1,0 +1,55 @@
+diff --git a/processes.json b/processes.json
+index 60bf033..fd1adf4 100644
+--- a/processes.json
++++ b/processes.json
+@@ -4,10 +4,10 @@
+       "name": "mirakurun-server",
+       "script": "lib/server.js",
+       "node_args" : "--max-semi-space-size=64 -r source-map-support/register",
+-      "error_file": "/usr/local/var/log/mirakurun.stderr.log",
+-      "out_file": "/usr/local/var/log/mirakurun.stdout.log",
++      "error_file": "/var/log/mirakurun.stderr.log",
++      "out_file": "/var/log/mirakurun.stdout.log",
+       "merge_logs": true,
+-      "pid_file": "/usr/local/var/run/mirakurun.pid",
++      "pid_file": "/var/run/mirakurun.pid",
+       "exec_mode": "fork",
+       "autorestart": true,
+       "env": {
+diff --git a/src/Mirakurun/config.ts b/src/Mirakurun/config.ts
+index 49dedfd..b3c1683 100644
+--- a/src/Mirakurun/config.ts
++++ b/src/Mirakurun/config.ts
+@@ -17,7 +17,7 @@ import { execSync } from "child_process";
+ import { dirname } from "path";
+ import { hostname } from "os";
+ import { existsSync, readdirSync } from "fs";
+-import { mkdir, copyFile, readFile, writeFile } from "fs/promises";
++import { mkdir, copyFile, chmod, readFile, writeFile } from "fs/promises";
+ import * as yaml from "js-yaml";
+ import * as ipnum from "ip-num";
+ import Queue from "promise-queue";
+@@ -84,6 +84,7 @@ export async function loadServer(): Promise<Server> {
+         try {
+             log.info("copying default server config to `%s`", path);
+             await copyFile("config/server.yml", path);
++            await chmod(path, 0o644);
+         } catch (e) {
+             log.fatal("failed to copy server config to `%s`", path);
+             console.error(e);
+@@ -335,6 +336,7 @@ export async function loadTuners(): Promise<Tuner[]> {
+         try {
+             log.info("copying default tuners config to `%s`", path);
+             await copyFile("config/tuners.yml", path);
++            await chmod(path, 0o644);
+         } catch (e) {
+             log.fatal("failed to copy tuners config to `%s`", path);
+             console.error(e);
+@@ -372,6 +374,7 @@ export async function loadChannels(): Promise<Channel[]> {
+         try {
+             log.info("copying default channels config to `%s`", path);
+             await copyFile("config/channels.yml", path);
++            await chmod(path, 0o644);
+         } catch (e) {
+             log.fatal("failed to copy channels config to `%s`", path);
+             console.error(e);

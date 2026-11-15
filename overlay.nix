@@ -27,6 +27,7 @@ in
   mirakurun = final.callPackage ./packages/apps/mirakurun { };
   recisdb = final.callPackage ./packages/apps/recisdb { };
   dantto4k = final.callPackage ./packages/apps/dantto4k { };
+  dmirakurun = final.callPackage ./packages/apps/dmirakurun { };
 
   # avisynth
   avisynthcudafilters = final.callPackage ./packages/avisynth/avisynthcudafilters {
