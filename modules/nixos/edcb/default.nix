@@ -50,28 +50,15 @@ let
 
   enabledBonDrivers = lib.filterAttrs (_: drv: drv.enable) cfg.bonDrivers;
 
-  resolveSoFile =
-    name: drv: if drv.soFile != null then drv.soFile else "${drv.package}/lib/edcb/${name}.so";
-
-  resolveIniFile =
-    name: drv:
-    if drv.iniFile != null then
-      drv.iniFile
-    else if drv.settings != null then
-      pkgs.writeText "${name}.so.ini" (lib.generators.toINI { } drv.settings)
-    else
-      null;
-
   installBonDriver =
     name: drv:
-    let
-      iniFile = resolveIniFile name drv;
-    in
     ''
-      install -m 0644 "${resolveSoFile name drv}" "$libDir/${name}.so"
+      install -m 0644 "${drv.soFile}" "$libDir/${name}.so"
     ''
-    + lib.optionalString (iniFile != null) ''
-      install -m 0644 "${iniFile}" "$libDir/${name}.so.ini"
+    + lib.optionalString (drv.settings != null) ''
+      install -m 0644 "${
+        pkgs.writeText "${name}.so.ini" (lib.generators.toINI { } drv.settings)
+      }" "$libDir/${name}.so.ini"
     ''
     + lib.optionalString (drv.chSet4File != null) ''
       install -m 0644 "${drv.chSet4File}" "$settingDir/${name}(${drv.tunerName}).ChSet4.txt"
@@ -153,19 +140,9 @@ let
           description = "この BonDriver を配置します。";
         };
 
-        package = lib.mkOption {
-          type = lib.types.nullOr lib.types.package;
-          default = null;
-          description = ''
-            BonDriver を含むパッケージ。`soFile` が未指定の場合、
-            `''${package}/lib/edcb/${name}.so` を使用します。
-          '';
-        };
-
         soFile = lib.mkOption {
-          type = lib.types.nullOr lib.types.path;
-          default = null;
-          description = "BonDriver 本体 (.so) のパス。指定した場合は `package` より優先されます。";
+          type = lib.types.path;
+          description = "BonDriver 本体 (.so) のパス。";
         };
 
         settings = lib.mkOption {
@@ -176,13 +153,7 @@ let
               PRIORITY = 8;
             };
           };
-          description = "`${name}.so.ini` の内容 (INI 形式に変換されます)。`iniFile` とは同時に指定できません。";
-        };
-
-        iniFile = lib.mkOption {
-          type = lib.types.nullOr lib.types.path;
-          default = null;
-          description = "`${name}.so.ini` としてそのまま配置するファイル。`settings` とは同時に指定できません。";
+          description = "`${name}.so.ini` の内容 (INI 形式に変換されます)。";
         };
 
         tunerName = lib.mkOption {
@@ -286,7 +257,7 @@ in
       example = lib.literalExpression ''
         {
           BonDriver_LinuxMirakc_T = {
-            package = pkgs.bondriver_linuxmirakc;
+            soFile = "''${pkgs.bondriver_linuxmirakc}/lib/edcb/BonDriver_LinuxMirakc.so";
             settings.GLOBAL.PRIORITY = 9;
             tunerName = "LinuxMirakc";
             chSet4File = ./BonDriver_LinuxMirakc_T.ChSet4.txt;
@@ -311,14 +282,6 @@ in
         {
           assertion = lib.hasPrefix "BonDriver_" name;
           message = "services.edcb.bonDrivers.${name}: BonDriver 名は `BonDriver_` で始まる必要があります。";
-        }
-        {
-          assertion = drv.soFile != null || drv.package != null;
-          message = "services.edcb.bonDrivers.${name}: `package` か `soFile` のどちらかを指定してください。";
-        }
-        {
-          assertion = !(drv.settings != null && drv.iniFile != null);
-          message = "services.edcb.bonDrivers.${name}: `settings` と `iniFile` は同時に指定できません。";
         }
         {
           assertion = drv.chSet4File == null || drv.tunerName != null;
