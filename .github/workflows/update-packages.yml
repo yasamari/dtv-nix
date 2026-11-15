@@ -53,8 +53,8 @@ jobs:
             packages=$(jq -c --arg p "$REQUESTED" '[ $p ]' <<<"$packages")
           else
             count=$(jq 'length' <<<"$packages")
-            if [ "$count" -ne 28 ]; then
-              echo "expected 28 update targets, found $count" >&2
+            if [ "$count" -ne 31 ]; then
+              echo "expected 31 update targets, found $count" >&2
               jq . <<<"$packages" >&2
               exit 1
             fi
