@@ -2,7 +2,7 @@ name: Update packages
 
 on:
   schedule:
-    - cron: "0 18 * * *" # 03:00 JST
+    - cron: "23 18 * * *" # 03:23 JST
   workflow_dispatch:
     inputs:
       package:
