@@ -53,9 +53,6 @@ stdenv.mkDerivation {
     # Nixpkgs ships shared libraries only; the runtime closure provides them.
     substituteInPlace meson.build \
       --replace-fail 'static : true' 'static : false'
-    substituteInPlace Amatsukaze/AmatsukazeCLI.hpp \
-      --replace-fail 'conf.nicoConvChSidPath = pathGetDirectory(nicoJKToolPath) + _T("/ch_sid.txt");' \
-                     'tstring nicoConvDir = pathGetDirectory(nicoJKToolPath); conf.nicoConvChSidPath = nicoConvDir.empty() ? moduleDir + _T("/ch_sid.txt") : nicoConvDir + _T("/ch_sid.txt");'
   '';
 
   configurePhase = ''

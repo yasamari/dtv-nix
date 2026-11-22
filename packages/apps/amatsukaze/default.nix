@@ -9,6 +9,7 @@
   amatsukaze-native,
   amatsukaze-webui,
   danmaku2ass,
+  nicojk_ass,
   ffmpeg_6,
   x264,
   x265,
@@ -118,9 +119,13 @@ stdenv.mkDerivation {
     cp -a "${joinLogoScp}/share/join_logo_scp/JL" "$shareDir/JL"
 
     cp -a "${danmaku2ass}/share/danmaku2ass/danmaku2ass.py" "$shareDir/scripts/"
-    chmod +x "$shareDir/scripts/nicojk_ass.py" "$shareDir/scripts/danmaku2ass.py"
-    ln -s "$shareDir/scripts/nicojk_ass.py" "$out/bin/nicojk_ass.py"
+    chmod +x "$shareDir/scripts/danmaku2ass.py"
     ln -s "$shareDir/scripts/danmaku2ass.py" "$out/bin/danmaku2ass.py"
+
+    # 1.1.1.7 dropped scripts/nicojk_ass.py; the CLI now looks for a
+    # nicojk_ass executable next to itself (exe_files/nicojk_ass).
+    ln -s "${nicojk_ass}/bin/nicojk_ass" "$exeDir/nicojk_ass"
+    ln -s "$exeDir/nicojk_ass" "$out/bin/nicojk_ass"
 
     mkdir -p "$exeDir/plugins64"
     cp -a defaults/exe_files/plugins64/. "$exeDir/plugins64/"

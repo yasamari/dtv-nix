@@ -25,6 +25,7 @@ in
   konomitv = final.callPackage ./packages/apps/konomitv { };
   konomitv-client = final.callPackage ./packages/apps/konomitv-client { };
   mirakurun = final.callPackage ./packages/apps/mirakurun { };
+  nicojk_ass = final.callPackage ./packages/apps/nicojk_ass { };
   recisdb = final.callPackage ./packages/apps/recisdb { };
   dantto4k = final.callPackage ./packages/apps/dantto4k { };
   dmirakurun = final.callPackage ./packages/apps/dmirakurun { };
