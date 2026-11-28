@@ -9,14 +9,14 @@ let
 in
 py.buildPythonApplication rec {
   pname = "nicojk_ass";
-  version = "0.02";
+  version = "0.03";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "rigaya";
     repo = "nicojk_ass";
     rev = version;
-    hash = "sha256-jBohJlxs8PWPGdlrmNZDSFFBV+Gfopt1OX+Mxnhbg4E=";
+    hash = "sha256-me4mV3f4C7f2xewrdI5y5IrZbdX4sXvhBJrztrXSbs0=";
   };
 
   nativeBuildInputs = [ py.setuptools ];
